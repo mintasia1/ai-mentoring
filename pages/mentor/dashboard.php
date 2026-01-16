@@ -145,7 +145,7 @@ $is_profile_complete = $profile_completion >= 100;
           <h3>⚠️ Profil Belum Lengkap</h3>
           <p>Lengkapi profil Anda untuk meningkatkan kredibilitas dan kepercayaan siswa.</p>
           <div class="profile-completion-bar">
-            <div class="profile-completion-fill" style="width:  <? = round($profile_completion) ?>%;"></div>
+            <div class="profile-completion-fill" style="width:  <?= round($profile_completion) ?>%;"></div>
           </div>
           <p style="margin-top: 5px; font-size: 0.9rem;"><?=round($profile_completion) ?>% Lengkap</p>
         </div>
@@ -162,7 +162,7 @@ $is_profile_complete = $profile_completion >= 100;
         </div>
         <a href="complete_profile.php" class="complete-profile-btn">Edit Profil</a>
       </div>
-      <?php endif ?>
+      <?php endif; ?>
 
       <section class="mentor-stats">
         <?php
@@ -188,11 +188,11 @@ $is_profile_complete = $profile_completion >= 100;
         mysqli_stmt_close($stmt_siswa_aktif);
         ?>
         <div class="stat-card">
-          <h3><? = $total_kelas_ampu ? ></h3>
+          <h3><?= $total_kelas_ampu ?></h3>
           <p>Kelas yang Diampu</p>
         </div>
         <div class="stat-card">
-          <h3><? = $total_siswa_aktif ?></h3>
+          <h3><?= $total_siswa_aktif ?></h3>
           <p>Siswa Aktif</p>
         </div>
         <div class="stat-card">
