@@ -16,14 +16,17 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Setup SSH Key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SG_SSH_PRIVATE_KEY }}
+          SSH_PASSPHRASE: ${{ secrets.SG_SSH_PASSPHRASE }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SG_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SG_SERVER }} >> ~/.ssh/known_hosts
-          # If passphrase is provided, decrypt the key and save without passphrase
-          if [ -n "${{ secrets.SG_SSH_PASSPHRASE }}" ]; then
-            ssh-keygen -p -N "" -P "${{ secrets.SG_SSH_PASSPHRASE }}" -f ~/.ssh/id_rsa
+          # If passphrase is provided, remove it from the key
+          if [ -n "$SSH_PASSPHRASE" ]; then
+            ssh-keygen -p -N "" -P "$SSH_PASSPHRASE" -f ~/.ssh/id_rsa
           fi
       
       - name: Deploy via rsync
