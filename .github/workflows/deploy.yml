@@ -77,7 +77,7 @@ jobs:
           SG_USER: ${{ secrets.SG_USER }}
         run: |
           echo "Starting deployment to $SG_SERVER..."
-          rsync -avz --delete \
+          rsync -avz --checksum --delete \
             -e "ssh -p ${SG_PORT} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
             --exclude='.git' \
             --exclude='.github' \
