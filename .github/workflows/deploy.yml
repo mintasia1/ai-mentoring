@@ -48,19 +48,19 @@ jobs:
           
           # Add server to known_hosts
           echo "Scanning SSH host keys for $SG_SERVER..."
-          if output=$(ssh-keyscan -H "$SG_SERVER" 2>&1); then
+          if output=$(ssh-keyscan -H "$SG_SERVER" 2>&1) && [ -n "$output" ]; then
             echo "$output" >> ~/.ssh/known_hosts
             echo "✓ SSH host keys added to known_hosts"
           else
-            echo "Warning: ssh-keyscan failed with output:"
-            echo "$output"
-            echo "This might cause issues during deployment"
+            echo "⚠ ssh-keyscan failed or timed out"
+            echo "This is OK - deployment will continue with StrictHostKeyChecking=no"
           fi
           
           # If passphrase is provided, try to remove it from the key
           if [ -n "$SSH_PASSPHRASE" ]; then
             echo "Attempting to remove passphrase from SSH key..."
-            if ssh-keygen -p -N "" -P "$SSH_PASSPHRASE" -f ~/.ssh/id_rsa 2>/dev/null; then
+            # Redirect all output including the informational messages
+            if ssh-keygen -p -N "" -P "$SSH_PASSPHRASE" -f ~/.ssh/id_rsa >/dev/null 2>&1; then
               echo "✓ Passphrase removed successfully"
             else
               echo "Note: Could not remove passphrase (key might not be passphrase-protected or passphrase is incorrect)"
@@ -76,7 +76,8 @@ jobs:
           SG_PORT: ${{ secrets.SG_PORT }}
           SG_USER: ${{ secrets.SG_USER }}
         run: |
-          rsync -avz --delete \
+          echo "Starting deployment to $SG_SERVER..."
+          rsync -avz --checksum --delete \
             -e "ssh -p ${SG_PORT} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
             --exclude='.git' \
             --exclude='.github' \
@@ -84,6 +85,7 @@ jobs:
             --exclude='.env' \
             --exclude='*.log' \
             ./ ${SG_USER}@${SG_SERVER}:~/public_html/
+          echo "✓ Files uploaded successfully"
       
       - name: Cleanup SSH Key
         if: always()
@@ -91,5 +93,4 @@ jobs:
       
       - name: Deployment Complete
         run: |
-          echo "Deployment to SiteGround completed successfully!"
-          echo "Application URL: https://${SG_SERVER}"
+          echo "✓ Deployment to SiteGround completed successfully!"
