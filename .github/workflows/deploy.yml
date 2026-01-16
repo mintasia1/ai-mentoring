@@ -93,5 +93,4 @@ jobs:
       
       - name: Deployment Complete
         run: |
-          echo "Deployment to SiteGround completed successfully!"
-          echo "Application URL: https://${SG_SERVER}"
+          echo "✓ Deployment to SiteGround completed successfully!"
