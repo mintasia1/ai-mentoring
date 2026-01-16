@@ -20,7 +20,6 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SG_SSH_PRIVATE_KEY }}
           SSH_PASSPHRASE: ${{ secrets.SG_SSH_PASSPHRASE }}
         run: |
-          set -e
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           
