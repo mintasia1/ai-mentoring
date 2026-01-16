@@ -5,11 +5,11 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
     exit();
 }
 
-include '../../database/db.php';
+include '../../database/db. php';
 $id_mentor_login = $_SESSION['user_id'];
 
 // Check mentor profile completion
-$query_profile = "SELECT username, email, nama_lengkap, no_telepon, alamat, bio, foto_profil FROM mentor WHERE id_mentor = ? ";
+$query_profile = "SELECT username, email, nama_lengkap, no_telepon, alamat, bio, foto_profil FROM mentor WHERE id_mentor = ?";
 $stmt_profile = mysqli_prepare($conn, $query_profile);
 mysqli_stmt_bind_param($stmt_profile, "s", $id_mentor_login);
 mysqli_stmt_execute($stmt_profile);
@@ -31,7 +31,7 @@ $filled_fields += 2; // username and email are always filled
 $profile_completion = ($filled_fields / $total_fields) * 100;
 $is_profile_complete = $profile_completion >= 100;
 ?>
-<! DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
@@ -55,7 +55,7 @@ $is_profile_complete = $profile_completion >= 100;
       box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
     }
     
-    .profile-alert.complete {
+    .profile-alert. complete {
       background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
       box-shadow: 0 4px 15px rgba(86, 171, 47, 0.3);
     }
@@ -78,8 +78,8 @@ $is_profile_complete = $profile_completion >= 100;
     
     .profile-completion-bar {
       width: 100%;
-      height: 8px;
-      background: rgba(255, 255, 255, 0.3);
+      height:  8px;
+      background:  rgba(255, 255, 255, 0.3);
       border-radius: 10px;
       margin-top: 10px;
       overflow: hidden;
@@ -123,9 +123,9 @@ $is_profile_complete = $profile_completion >= 100;
       <h2>Mentor Panel</h2>
       <nav>
   <a href="dashboard.php" class="<? = (basename($_SERVER['PHP_SELF']) == 'dashboard.php') ? 'active' : ''; ?>">Dashboard</a>
-  <a href="live-class.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'live-class.php') ? 'active' : ''; ?>">Live Class</a>
-  <a href="lihat_murid.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'lihat_murid.php') ? 'active' : ''; ?>">Lihat Murid</a>
-  <a href="kelola_materi_saya.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'kelola_materi_saya.php') ? 'active' : ''; ?>">Kelola Materi Saya</a>
+  <a href="live-class.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'live-class.php') ? 'active' : ''; ?>">Live Class</a>
+  <a href="lihat_murid.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'lihat_murid.php') ? 'active' : ''; ?>">Lihat Murid</a>
+  <a href="kelola_materi_saya.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'kelola_materi_saya.php') ? 'active' : ''; ?>">Kelola Materi Saya</a>
   <a href="../../pages/galery_karya.php">Galery Karya</a>
   <a href="../../guest/index.php">Kembali ke Beranda</a>
   <a href="../../guest/logout.php">Logout</a>
@@ -139,7 +139,7 @@ $is_profile_complete = $profile_completion >= 100;
       </header>
       
       <!-- Profile Completion Alert -->
-      <? php if (! $is_profile_complete): ?>
+      <?php if (! $is_profile_complete): ?>
       <div class="profile-alert">
         <div class="profile-alert-content">
           <h3>⚠️ Profil Belum Lengkap</h3>
@@ -147,15 +147,15 @@ $is_profile_complete = $profile_completion >= 100;
           <div class="profile-completion-bar">
             <div class="profile-completion-fill" style="width:  <? = round($profile_completion) ?>%;"></div>
           </div>
-          <p style="margin-top: 5px; font-size: 0.9rem;"><?= round($profile_completion) ?>% Lengkap</p>
+          <p style="margin-top: 5px; font-size: 0.9rem;"><?=round($profile_completion) ?>% Lengkap</p>
         </div>
-        <a href="complete_profile.php" class="complete-profile-btn">Lengkapi Profil</a>
+        <a href="complete_profile. php" class="complete-profile-btn">Lengkapi Profil</a>
       </div>
       <?php else: ?>
       <div class="profile-alert complete">
         <div class="profile-alert-content">
           <h3>✓ Profil Lengkap</h3>
-          <p>Profil Anda sudah lengkap!  Anda dapat mengupdate profil kapan saja.</p>
+          <p>Profil Anda sudah lengkap! Anda dapat mengupdate profil kapan saja.</p>
           <div class="profile-completion-bar">
             <div class="profile-completion-fill" style="width: 100%;"></div>
           </div>
@@ -165,7 +165,7 @@ $is_profile_complete = $profile_completion >= 100;
       <?php endif; ?>
 
       <section class="mentor-stats">
-        <? php
+        <?php
         // Jumlah kelas yang diampu
         $query_kelas_ampu = "SELECT COUNT(*) AS total_kelas_ampu FROM kelas_seni WHERE id_mentor = ?";
         $stmt_kelas_ampu = mysqli_prepare($conn, $query_kelas_ampu);
@@ -192,7 +192,7 @@ $is_profile_complete = $profile_completion >= 100;
           <p>Kelas yang Diampu</p>
         </div>
         <div class="stat-card">
-          <h3><?= $total_siswa_aktif ?></h3>
+          <h3><? = $total_siswa_aktif ?></h3>
           <p>Siswa Aktif</p>
         </div>
         <div class="stat-card">
