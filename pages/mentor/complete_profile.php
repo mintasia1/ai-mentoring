@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             }
 
             $file_extension = pathinfo($_FILES['foto_profil']['name'], PATHINFO_EXTENSION);
-            $new_filename = 'mentor_' . $id_mentor_login . '_' .  time() . '.' . $file_extension;
+            $new_filename = 'mentor_' . $id_mentor_login . '_' . time() . '.' . $file_extension;
             $upload_path = $upload_dir .  $new_filename;
 
             if (move_uploaded_file($_FILES['foto_profil']['tmp_name'], $upload_path)) {
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                         no_telepon = ?, 
                         alamat = ?, 
                         bio = ?, 
-                        foto_profil = ?  
+                        foto_profil = ?   
                         WHERE id_mentor = ?";
         $stmt_update = mysqli_prepare($conn, $query_update);
         mysqli_stmt_bind_param($stmt_update, "ssssss", $nama_lengkap, $no_telepon, $alamat, $bio, $foto_profil_path, $id_mentor_login);
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     }
 }
 ?>
-<! DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     
     .profile-photo-preview img {
       max-width: 200px;
-      max-height:  200px;
+      max-height: 200px;
       border-radius: 10px;
       border: 3px solid var(--primary-color);
     }
@@ -170,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
       font-size: 1rem;
       cursor: pointer;
       transition: all 0.3s;
-      margin-top: 10px;
+      margin-top:  10px;
     }
     
     .submit-btn:hover {
@@ -200,7 +200,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     .message {
       padding: 15px;
       border-radius: 8px;
-      margin-bottom:  20px;
+      margin-bottom: 20px;
       font-weight: 600;
     }
     
@@ -209,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
       color: #fff;
     }
     
-    .message.error {
+    .message. error {
       background: linear-gradient(135deg, #ff6b6b 0%, #ff9a56 100%);
       color: #fff;
     }
@@ -285,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
               type="tel" 
               id="no_telepon" 
               name="no_telepon" 
-              value="<? = htmlspecialchars($mentor_data['no_telepon'] ?? '') ?>" 
+              value="<?= htmlspecialchars($mentor_data['no_telepon'] ?? '') ?>" 
               required
               placeholder="Contoh: 081234567890">
           </div>
@@ -366,7 +366,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
       
       // Validate phone number format
       const phoneRegex = /^[0-9]{10,15}$/;
-      if (!phoneRegex.test(telepon)) {
+      if (! phoneRegex.test(telepon)) {
         e.preventDefault();
         alert('Nomor telepon tidak valid!  Masukkan 10-15 digit angka.');
         return false;

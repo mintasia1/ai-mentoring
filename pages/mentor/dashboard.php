@@ -1,11 +1,11 @@
-<? php
+<?php
 session_start();
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'mentor') {
-    header("Location: ../../guest/login. php");
+    header("Location: ../../guest/login.php");
     exit();
 }
 
-include '../../database/db. php';
+include '../../database/db.php';
 $id_mentor_login = $_SESSION['user_id'];
 
 // Check mentor profile completion
@@ -64,7 +64,7 @@ $is_profile_complete = $profile_completion >= 100;
       flex: 1;
     }
     
-    . profile-alert h3 {
+    .profile-alert h3 {
       margin: 0 0 10px 0;
       color: #fff;
       font-size: 1.2rem;
@@ -93,7 +93,7 @@ $is_profile_complete = $profile_completion >= 100;
     }
     
     .complete-profile-btn {
-      background:  #fff;
+      background: #fff;
       color: #ff6b6b;
       padding: 12px 24px;
       border: none;
@@ -111,7 +111,7 @@ $is_profile_complete = $profile_completion >= 100;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
     
-    .profile-alert.complete . complete-profile-btn {
+    .profile-alert. complete . complete-profile-btn {
       color: #56ab2f;
     }
   </style>
@@ -143,9 +143,9 @@ $is_profile_complete = $profile_completion >= 100;
       <div class="profile-alert">
         <div class="profile-alert-content">
           <h3>⚠️ Profil Belum Lengkap</h3>
-          <p>Lengkapi profil Anda untuk meningkatkan kredibilitas dan kepercayaan siswa. </p>
+          <p>Lengkapi profil Anda untuk meningkatkan kredibilitas dan kepercayaan siswa.</p>
           <div class="profile-completion-bar">
-            <div class="profile-completion-fill" style="width: <?= round($profile_completion) ?>%;"></div>
+            <div class="profile-completion-fill" style="width:  <? = round($profile_completion) ?>%;"></div>
           </div>
           <p style="margin-top: 5px; font-size: 0.9rem;"><?= round($profile_completion) ?>% Lengkap</p>
         </div>
@@ -155,7 +155,7 @@ $is_profile_complete = $profile_completion >= 100;
       <div class="profile-alert complete">
         <div class="profile-alert-content">
           <h3>✓ Profil Lengkap</h3>
-          <p>Profil Anda sudah lengkap! Anda dapat mengupdate profil kapan saja.</p>
+          <p>Profil Anda sudah lengkap!  Anda dapat mengupdate profil kapan saja.</p>
           <div class="profile-completion-bar">
             <div class="profile-completion-fill" style="width: 100%;"></div>
           </div>
@@ -196,7 +196,8 @@ $is_profile_complete = $profile_completion >= 100;
           <p>Siswa Aktif</p>
         </div>
         <div class="stat-card">
-          <h3>0</h3> <p>Live Class Hari Ini</p>
+          <h3>0</h3>
+          <p>Live Class Hari Ini</p>
         </div>
       </section>
     </main>
