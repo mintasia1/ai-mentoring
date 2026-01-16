@@ -3,7 +3,7 @@ name: Deploy to SiteGround
 on:
   push:
     branches:
-      - main
+      # - main
       - copilot/add-ztest-page
 
 jobs:
