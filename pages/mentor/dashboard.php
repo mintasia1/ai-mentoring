@@ -1,5 +1,10 @@
 <?php
 session_start();
+
+// TEMPORARY DEBUG - Add at line 1
+error_log("=== DASHBOARD DEBUG ===");
+
+
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'mentor') {
     header("Location: ../../guest/login.php");
     exit();
