@@ -16,11 +16,18 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Setup SSH Key
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SG_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SG_SERVER }} >> ~/.ssh/known_hosts
+          # Start ssh-agent and add key with passphrase if provided
+          if [ -n "${{ secrets.SG_SSH_PASSPHRASE }}" ]; then
+            eval "$(ssh-agent -s)"
+            echo "${{ secrets.SG_SSH_PASSPHRASE }}" | ssh-add ~/.ssh/id_rsa
+          fi
       
       - name: Deploy via rsync
         env:
