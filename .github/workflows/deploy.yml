@@ -1,0 +1,46 @@
+name: Deploy to SiteGround
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to SiteGround Server
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SG_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SG_SERVER }} >> ~/.ssh/known_hosts
+      
+      - name: Deploy via rsync
+        env:
+          SG_SERVER: ${{ secrets.SG_SERVER }}
+          SG_PORT: ${{ secrets.SG_PORT }}
+          SG_USER: ${{ secrets.SG_USER }}
+        run: |
+          rsync -avz --delete \
+            -e "ssh -p ${SG_PORT} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            --exclude='*.log' \
+            ./ ${SG_USER}@${SG_SERVER}:~/public_html/
+      
+      - name: Cleanup SSH Key
+        if: always()
+        run: rm -f ~/.ssh/id_rsa
+      
+      - name: Deployment Complete
+        run: |
+          echo "Deployment to SiteGround completed successfully!"
+          echo "Application URL: https://${SG_SERVER}"
