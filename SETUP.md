@@ -39,6 +39,29 @@ This platform digitizes the mentorship matching process between Alumni (Mentors)
 
 ### Step 1: Database Setup
 
+**Option A: Automated Setup (Recommended)**
+
+1. Update database credentials in `config/config.php`:
+```php
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'cuhk_ementoring');
+define('DB_USER', 'your_username');
+define('DB_PASS', 'your_password');
+```
+
+2. Run the automated setup script:
+```bash
+php database/setup.php
+```
+
+This script will:
+- Create the database if it doesn't exist
+- Import all tables from schema.sql
+- Create the default admin account
+- Verify the setup
+
+**Option B: Manual Setup**
+
 1. Create a MySQL database:
 ```sql
 CREATE DATABASE cuhk_ementoring CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -205,6 +228,26 @@ The platform is designed with separation of concerns to easily add RESTful API e
 - Alumni data synchronization
 
 ## Troubleshooting
+
+### Cannot Login with Default Admin Credentials
+
+If you're getting "Invalid email or password" error:
+
+1. **Reset the admin password** using the provided script:
+```bash
+php database/reset_admin_password.php
+```
+
+This will reset the password to `admin123` and verify it works.
+
+2. **Or manually update the password** in the database:
+```bash
+php -r "echo password_hash('admin123', PASSWORD_BCRYPT);"
+```
+Copy the output hash and update it in the database:
+```sql
+UPDATE users SET password_hash = 'YOUR_GENERATED_HASH' WHERE email = 'admin@cuhk.edu.hk';
+```
 
 ### Database Connection Issues
 - Verify credentials in `config/config.php`

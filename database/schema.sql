@@ -173,6 +173,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 
 -- Insert default super admin (password: admin123 - CHANGE IN PRODUCTION)
+-- Password hash generated with: password_hash('admin123', PASSWORD_BCRYPT)
 INSERT INTO users (email, password_hash, role, first_name, last_name) 
-VALUES ('admin@cuhk.edu.hk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'super_admin', 'System', 'Admin')
+VALUES ('admin@cuhk.edu.hk', '$2y$10$h6lrp9K0Sh.cXBxyF3KvTOdAF6.SGwIuEzkt6XXAAKBz73XpuhFte', 'super_admin', 'System', 'Admin')
 ON DUPLICATE KEY UPDATE email=email;
