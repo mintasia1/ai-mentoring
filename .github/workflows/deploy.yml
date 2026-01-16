@@ -48,10 +48,12 @@ jobs:
           
           # Add server to known_hosts
           echo "Scanning SSH host keys for $SG_SERVER..."
-          if ssh-keyscan -H "$SG_SERVER" >> ~/.ssh/known_hosts 2>&1; then
+          if output=$(ssh-keyscan -H "$SG_SERVER" 2>&1); then
+            echo "$output" >> ~/.ssh/known_hosts
             echo "✓ SSH host keys added to known_hosts"
           else
-            echo "Warning: ssh-keyscan failed, but continuing..."
+            echo "Warning: ssh-keyscan failed with output:"
+            echo "$output"
             echo "This might cause issues during deployment"
           fi
           
