@@ -122,10 +122,10 @@ $is_profile_complete = $profile_completion >= 100;
       <img src="../../assets/images/logo.png" class="logo" alt="Logo" />
       <h2>Mentor Panel</h2>
       <nav>
-  <a href="dashboard.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'dashboard.php') ? 'active' : ''; ?>">Dashboard</a>
-  <a href="live-class.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'live-class.php') ? 'active' : ''; ?>">Live Class</a>
-  <a href="lihat_murid.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'lihat_murid.php') ? 'active' : ''; ?>">Lihat Murid</a>
-  <a href="kelola_materi_saya.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'kelola_materi_saya.php') ? 'active' : ''; ?>">Kelola Materi Saya</a>
+  <a href="dashboard.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'dashboard.php') ? 'active' : '' ?>">Dashboard</a>
+  <a href="live-class.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'live-class.php') ? 'active' : '' ?>">Live Class</a>
+  <a href="lihat_murid.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'lihat_murid.php') ? 'active' : '' ?>">Lihat Murid</a>
+  <a href="kelola_materi_saya.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'kelola_materi_saya.php') ? 'active' : '' ?>">Kelola Materi Saya</a>
   <a href="../../pages/galery_karya.php">Galery Karya</a>
   <a href="../../guest/index.php">Kembali ke Beranda</a>
   <a href="../../guest/logout.php">Logout</a>
@@ -134,7 +134,7 @@ $is_profile_complete = $profile_completion >= 100;
     <main class="main-content">
       <header>
         <button id="modeToggle" style="position: fixed; top: 10px; right: 10px; z-index: 200;">☀️/🌙</button>
-        <h1>Selamat Datang, Mentor <? = htmlspecialchars($_SESSION['username'] ?? ''); ?>!</h1>
+        <h1>Selamat Datang, Mentor <?= htmlspecialchars($_SESSION['username'] ?? '') ?>!</h1>
         <p>Berikut ringkasan aktivitas dan kelas kamu. </p>
       </header>
       
@@ -162,7 +162,7 @@ $is_profile_complete = $profile_completion >= 100;
         </div>
         <a href="complete_profile.php" class="complete-profile-btn">Edit Profil</a>
       </div>
-      <?php endif; ?>
+      <?php endif ?>
 
       <section class="mentor-stats">
         <?php
