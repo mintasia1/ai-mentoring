@@ -51,7 +51,7 @@ try {
         echo "  Role: " . $admin['role'] . "\n\n";
         
         // Generate new password hash
-        $newPassword = 'admin123';
+        $newPassword = 'wTuGGy(E$!W~M,jJGO{';
         $passwordHash = password_hash($newPassword, PASSWORD_BCRYPT);
         
         // Update password

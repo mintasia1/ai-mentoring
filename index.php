@@ -7,14 +7,14 @@
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/classes/Auth.php';
 
-$pageTitle = 'Home - ' . APP_NAME;
-include __DIR__ . '/includes/header.php';
-
 if (Auth::isLoggedIn()) {
     $role = Auth::getCurrentUserRole();
     header("Location: /pages/$role/dashboard.php");
-    exit();
+    //exit();
 }
+
+$pageTitle = 'Home - ' . APP_NAME;
+include __DIR__ . '/includes/header.php';
 ?>
 
 <div class="card">

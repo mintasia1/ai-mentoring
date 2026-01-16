@@ -109,7 +109,11 @@ class Auth {
     /**
      * Logout user
      */
-    public function logout() {
+    public static function logout() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_name(SESSION_NAME);
+            session_start();
+        }
         if (isset($_SESSION['user_id'])) {
             AuditLog::log($_SESSION['user_id'], 'user_logout', 'users', $_SESSION['user_id'], 'User logged out');
         }

@@ -20,6 +20,7 @@ $currentRole = Auth::getCurrentUserRole();
         header { background: #2c3e50; color: white; padding: 1rem 0; }
         header .container { display: flex; justify-content: space-between; align-items: center; }
         header h1 { font-size: 1.5rem; }
+        header h1, header h1 a { color: white; }
         nav a { color: white; text-decoration: none; margin-left: 20px; }
         nav a:hover { text-decoration: underline; }
         .btn { display: inline-block; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; }
@@ -53,7 +54,7 @@ $currentRole = Auth::getCurrentUserRole();
 <body>
     <header>
         <div class="container">
-            <h1><?php echo APP_NAME; ?></h1>
+            <h1><a href="/index.php"><?php echo APP_NAME; ?></a></h1>
             <nav>
                 <?php if ($isLoggedIn): ?>
                     <?php if ($currentRole === 'mentee'): ?>
