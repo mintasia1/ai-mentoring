@@ -21,13 +21,33 @@ jobs:
           SSH_PASSPHRASE: ${{ secrets.SG_SSH_PASSPHRASE }}
         run: |
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          
+          # Validate SSH key is provided
+          if [ -z "$SSH_PRIVATE_KEY" ]; then
+            echo "Error: SG_SSH_PRIVATE_KEY secret is not set"
+            exit 1
+          fi
+          
+          # Write SSH key to file
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          
+          # Add server to known_hosts
           ssh-keyscan -H ${{ secrets.SG_SERVER }} >> ~/.ssh/known_hosts
-          # If passphrase is provided, remove it from the key
+          
+          # If passphrase is provided, try to remove it from the key
           if [ -n "$SSH_PASSPHRASE" ]; then
-            ssh-keygen -p -N "" -P "$SSH_PASSPHRASE" -f ~/.ssh/id_rsa
+            echo "Attempting to remove passphrase from SSH key..."
+            if ssh-keygen -p -N "" -P "$SSH_PASSPHRASE" -f ~/.ssh/id_rsa 2>/dev/null; then
+              echo "Passphrase removed successfully"
+            else
+              echo "Note: Could not remove passphrase (key might not be passphrase-protected or passphrase is incorrect)"
+              echo "Continuing with original key..."
+            fi
           fi
+          
+          echo "SSH key setup completed"
       
       - name: Deploy via rsync
         env:
