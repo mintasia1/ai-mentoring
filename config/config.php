@@ -6,14 +6,14 @@
 
 // Database credentials
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'cuhk_ementoring');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_NAME', 'dbhfjgv6xlthd8');
+define('DB_USER', 'uargdrqdobm3h');
+define('DB_PASS', '@}&j7r3J2qn1');
 define('DB_CHARSET', 'utf8mb4');
 
 // Application settings
 define('APP_NAME', 'CUHK Law E-Mentoring Platform');
-define('APP_URL', 'http://localhost');
+define('APP_URL', 'https://ai-mentoring.mint-client.com');
 define('SESSION_LIFETIME', 3600); // 1 hour in seconds
 
 // Security settings
