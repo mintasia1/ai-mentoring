@@ -18,7 +18,7 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 <div class="card">
-    <h2>Welcome to CUHK Law E-Mentoring Platform!</h2>
+    <h2>Welcome to CUHK Law E-Mentoring Platform.</h2>
     <p>Connect with experienced legal professionals and receive guidance for your career journey.</p>
     
     <h3>About the Platform</h3>
