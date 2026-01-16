@@ -1,212 +1,100 @@
 <?php
-session_start();
+/**
+ * Mentor Dashboard
+ * CUHK Law E-Mentoring Platform
+ */
 
-// TEMPORARY DEBUG - Add at line 1
-error_log("=== DASHBOARD DEBUG ===");
+require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../classes/Auth.php';
+require_once __DIR__ . '/../../classes/User.php';
+require_once __DIR__ . '/../../classes/Mentor.php';
+require_once __DIR__ . '/../../classes/Mentorship.php';
 
+Auth::requireRole('mentor');
 
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'mentor') {
-    header("Location: ../../guest/login.php");
-    exit();
-}
+$pageTitle = 'Mentor Dashboard';
+$userId = Auth::getCurrentUserId();
 
-include '../../database/db. php';
-$id_mentor_login = $_SESSION['user_id'];
+$userClass = new User();
+$mentorClass = new Mentor();
+$mentorshipClass = new Mentorship();
 
-// Check mentor profile completion
-$query_profile = "SELECT username, email, nama_lengkap, no_telepon, alamat, bio, foto_profil FROM mentor WHERE id_mentor = ?";
-$stmt_profile = mysqli_prepare($conn, $query_profile);
-mysqli_stmt_bind_param($stmt_profile, "s", $id_mentor_login);
-mysqli_stmt_execute($stmt_profile);
-$result_profile = mysqli_stmt_get_result($stmt_profile);
-$mentor_data = mysqli_fetch_assoc($result_profile);
-mysqli_stmt_close($stmt_profile);
+$user = $userClass->getUserProfile($userId);
+$profile = $user['profile'] ?? null;
+$activeMentorships = $mentorshipClass->getActiveMentorships($userId, 'mentor');
+$pendingRequests = $mentorshipClass->getMentorRequests($userId, 'pending');
 
-// Calculate profile completion percentage
-$profile_fields = ['nama_lengkap', 'no_telepon', 'alamat', 'bio', 'foto_profil'];
-$filled_fields = 0;
-$total_fields = count($profile_fields) + 2; // +2 for username and email (always filled)
-
-foreach ($profile_fields as $field) {
-    if (!empty($mentor_data[$field])) {
-        $filled_fields++;
-    }
-}
-$filled_fields += 2; // username and email are always filled
-$profile_completion = ($filled_fields / $total_fields) * 100;
-$is_profile_complete = $profile_completion >= 100;
+include __DIR__ . '/../../includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard Mentor - ngeWIP ArtClass</title>
-  <script>
-  if (localStorage.getItem("theme") === "light") {
-    document.documentElement.classList.add("light-mode");
-  }
-</script>
-  <link rel="stylesheet" href="../../assets/css/mentor. css" />
-  <style>
-    .profile-alert {
-      background:  linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%);
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-    }
-    
-    .profile-alert. complete {
-      background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
-      box-shadow: 0 4px 15px rgba(86, 171, 47, 0.3);
-    }
-    
-    .profile-alert-content {
-      flex: 1;
-    }
-    
-    .profile-alert h3 {
-      margin: 0 0 10px 0;
-      color: #fff;
-      font-size: 1.2rem;
-    }
-    
-    .profile-alert p {
-      margin: 0;
-      color: #fff;
-      opacity: 0.9;
-    }
-    
-    .profile-completion-bar {
-      width: 100%;
-      height:  8px;
-      background:  rgba(255, 255, 255, 0.3);
-      border-radius: 10px;
-      margin-top: 10px;
-      overflow: hidden;
-    }
-    
-    .profile-completion-fill {
-      height: 100%;
-      background: #fff;
-      border-radius: 10px;
-      transition: width 0.5s ease;
-    }
-    
-    .complete-profile-btn {
-      background: #fff;
-      color: #ff6b6b;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-      transition: all 0.3s;
-      margin-left: 20px;
-    }
-    
-    .complete-profile-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-    
-    .profile-alert. complete . complete-profile-btn {
-      color: #56ab2f;
-    }
-  </style>
-</head>
-<body>
-  <div class="mentor-container">
-    <aside class="sidebar">
-      <img src="../../assets/images/logo.png" class="logo" alt="Logo" />
-      <h2>Mentor Panel</h2>
-      <nav>
-  <a href="dashboard.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'dashboard.php') ? 'active' : '' ?>">Dashboard</a>
-  <a href="live-class.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'live-class.php') ? 'active' : '' ?>">Live Class</a>
-  <a href="lihat_murid.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'lihat_murid.php') ? 'active' : '' ?>">Lihat Murid</a>
-  <a href="kelola_materi_saya.php" class="<?=(basename($_SERVER['PHP_SELF']) == 'kelola_materi_saya.php') ? 'active' : '' ?>">Kelola Materi Saya</a>
-  <a href="../../pages/galery_karya.php">Galery Karya</a>
-  <a href="../../guest/index.php">Kembali ke Beranda</a>
-  <a href="../../guest/logout.php">Logout</a>
-</nav>
-    </aside>
-    <main class="main-content">
-      <header>
-        <button id="modeToggle" style="position: fixed; top: 10px; right: 10px; z-index: 200;">☀️/🌙</button>
-        <h1>Selamat Datang, Mentor <?= htmlspecialchars($_SESSION['username'] ?? '') ?>!</h1>
-        <p>Berikut ringkasan aktivitas dan kelas kamu. </p>
-      </header>
-      
-      <!-- Profile Completion Alert -->
-      <?php if (! $is_profile_complete): ?>
-      <div class="profile-alert">
-        <div class="profile-alert-content">
-          <h3>⚠️ Profil Belum Lengkap</h3>
-          <p>Lengkapi profil Anda untuk meningkatkan kredibilitas dan kepercayaan siswa.</p>
-          <div class="profile-completion-bar">
-            <div class="profile-completion-fill" style="width:  <?= round($profile_completion) ?>%;"></div>
-          </div>
-          <p style="margin-top: 5px; font-size: 0.9rem;"><?=round($profile_completion) ?>% Lengkap</p>
-        </div>
-        <a href="complete_profile. php" class="complete-profile-btn">Lengkapi Profil</a>
-      </div>
-      <?php else: ?>
-      <div class="profile-alert complete">
-        <div class="profile-alert-content">
-          <h3>✓ Profil Lengkap</h3>
-          <p>Profil Anda sudah lengkap! Anda dapat mengupdate profil kapan saja.</p>
-          <div class="profile-completion-bar">
-            <div class="profile-completion-fill" style="width: 100%;"></div>
-          </div>
-        </div>
-        <a href="complete_profile.php" class="complete-profile-btn">Edit Profil</a>
-      </div>
-      <?php endif; ?>
 
-      <section class="mentor-stats">
-        <?php
-        // Jumlah kelas yang diampu
-        $query_kelas_ampu = "SELECT COUNT(*) AS total_kelas_ampu FROM kelas_seni WHERE id_mentor = ?";
-        $stmt_kelas_ampu = mysqli_prepare($conn, $query_kelas_ampu);
-        mysqli_stmt_bind_param($stmt_kelas_ampu, "s", $id_mentor_login);
-        mysqli_stmt_execute($stmt_kelas_ampu);
-        $result_kelas_ampu = mysqli_stmt_get_result($stmt_kelas_ampu);
-        $total_kelas_ampu = ($result_kelas_ampu) ? mysqli_fetch_assoc($result_kelas_ampu)['total_kelas_ampu'] : 0;
-        mysqli_stmt_close($stmt_kelas_ampu);
+<h2>Welcome, <?php echo htmlspecialchars($user['first_name']); ?>!</h2>
 
-        // Jumlah siswa aktif di kelas yang diampu mentor
-        $query_siswa_aktif = "SELECT COUNT(DISTINCT pk. id_member) AS total_siswa_aktif 
-                             FROM pendaftaran_kursus pk
-                             JOIN kelas_seni ks ON pk.id_kelas = ks.id_kelas
-                             WHERE ks.id_mentor = ? AND pk.status_pendaftaran = 'Aktif'";
-        $stmt_siswa_aktif = mysqli_prepare($conn, $query_siswa_aktif);
-        mysqli_stmt_bind_param($stmt_siswa_aktif, "s", $id_mentor_login);
-        mysqli_stmt_execute($stmt_siswa_aktif);
-        $result_siswa_aktif = mysqli_stmt_get_result($stmt_siswa_aktif);
-        $total_siswa_aktif = ($result_siswa_aktif) ? mysqli_fetch_assoc($result_siswa_aktif)['total_siswa_aktif'] : 0;
-        mysqli_stmt_close($stmt_siswa_aktif);
-        ?>
-        <div class="stat-card">
-          <h3><?= $total_kelas_ampu ?></h3>
-          <p>Kelas yang Diampu</p>
-        </div>
-        <div class="stat-card">
-          <h3><?= $total_siswa_aktif ?></h3>
-          <p>Siswa Aktif</p>
-        </div>
-        <div class="stat-card">
-          <h3>0</h3>
-          <p>Live Class Hari Ini</p>
-        </div>
-      </section>
-    </main>
-  </div>
-<script src="../assets/js/script.js"></script>
-</body>
-</html>
+<?php if (!$profile): ?>
+    <div class="alert alert-info">
+        Please complete your profile to start accepting mentees.
+        <a href="/pages/mentor/profile.php" class="btn" style="margin-left: 10px;">Complete Profile</a>
+    </div>
+<?php elseif (!$profile['is_verified']): ?>
+    <div class="alert alert-info">
+        Your profile is pending verification. You will be able to accept mentees once verified.
+    </div>
+<?php endif; ?>
+
+<div class="card">
+    <h3>My Statistics</h3>
+    <?php if ($profile): ?>
+        <p><strong>Current Mentees:</strong> <?php echo $profile['current_mentees']; ?> / <?php echo $profile['max_mentees']; ?></p>
+        <p><strong>Verification Status:</strong> 
+            <?php if ($profile['is_verified']): ?>
+                <span class="badge badge-success">Verified</span>
+            <?php else: ?>
+                <span class="badge badge-warning">Pending</span>
+            <?php endif; ?>
+        </p>
+    <?php endif; ?>
+    <p><strong>Pending Requests:</strong> <?php echo count($pendingRequests); ?></p>
+    <p><strong>Active Mentorships:</strong> <?php echo count($activeMentorships); ?></p>
+</div>
+
+<?php if (count($pendingRequests) > 0): ?>
+<div class="card">
+    <h3>Pending Requests</h3>
+    <p>You have <?php echo count($pendingRequests); ?> pending request(s).</p>
+    <a href="/pages/mentor/requests.php" class="btn">Review Requests</a>
+</div>
+<?php endif; ?>
+
+<div class="card">
+    <h3>Quick Actions</h3>
+    <a href="/pages/mentor/requests.php" class="btn">View Requests</a>
+    <a href="/pages/mentor/my_mentees.php" class="btn btn-secondary">My Mentees</a>
+    <a href="/pages/mentor/profile.php" class="btn btn-secondary">Edit Profile</a>
+</div>
+
+<?php if (!empty($activeMentorships)): ?>
+<div class="card">
+    <h3>My Active Mentees</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Mentee</th>
+                <th>Programme</th>
+                <th>Start Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($activeMentorships as $mentorship): ?>
+            <tr>
+                <td><?php echo htmlspecialchars($mentorship['first_name'] . ' ' . $mentorship['last_name']); ?></td>
+                <td><?php echo PROGRAMME_LEVELS[$mentorship['programme_level']] ?? $mentorship['programme_level']; ?></td>
+                <td><?php echo date('M d, Y', strtotime($mentorship['start_date'])); ?></td>
+                <td><a href="/pages/mentor/workspace.php?id=<?php echo $mentorship['id']; ?>" class="btn">Workspace</a></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+<?php endif; ?>
+
+<?php include __DIR__ . '/../../includes/footer.php'; ?>
