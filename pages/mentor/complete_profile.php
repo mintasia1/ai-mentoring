@@ -248,9 +248,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         <p>Isi data profil Anda untuk meningkatkan kredibilitas dan kepercayaan siswa.</p>
       </header>
       
-      <? php if (!empty($pesan)): ?>
+      <?php if (!empty($pesan)): ?>
       <div class="message <?= $pesan_type ?>">
-        <? = $pesan ?>
+        <?= $pesan ?>
       </div>
       <?php endif; ?>
       
@@ -296,7 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
               id="alamat" 
               name="alamat" 
               required
-              placeholder="Masukkan alamat lengkap Anda"><? = htmlspecialchars($mentor_data['alamat'] ?? '') ?></textarea>
+              placeholder="Masukkan alamat lengkap Anda"><?= htmlspecialchars($mentor_data['alamat'] ?? '') ?></textarea>
           </div>
           
           <div class="form-group">
@@ -320,8 +320,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             <p class="info-text">Format:  JPG, PNG, GIF.  Maksimal 5MB</p>
             
             <div class="profile-photo-preview" id="photoPreview">
-              <? php if (! empty($mentor_data['foto_profil']) && file_exists($mentor_data['foto_profil'])): ?>
-                <img src="<? = htmlspecialchars($mentor_data['foto_profil']) ?>" alt="Foto Profil">
+              <?php if (! empty($mentor_data['foto_profil']) && file_exists($mentor_data['foto_profil'])): ?>
+                <img src="<?= htmlspecialchars($mentor_data['foto_profil']) ?>" alt="Foto Profil">
               <?php endif; ?>
             </div>
           </div>
