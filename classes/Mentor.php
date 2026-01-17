@@ -128,5 +128,66 @@ class Mentor {
         );
         return $stmt->execute([$userId, $userId]);
     }
+    
+    /**
+     * Get all mentors with profiles (for admin)
+     */
+    public function getAllMentors($filter = 'all') {
+        $sql = "SELECT u.id, u.first_name, u.last_name, u.email, mp.* 
+                FROM users u 
+                INNER JOIN mentor_profiles mp ON u.id = mp.user_id 
+                WHERE u.status = 'active'";
+        
+        if ($filter === 'verified') {
+            $sql .= " AND mp.is_verified = 1";
+        } elseif ($filter === 'pending') {
+            $sql .= " AND mp.is_verified = 0";
+        }
+        
+        $sql .= " ORDER BY mp.is_verified ASC, mp.created_at DESC";
+        
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll();
+    }
+    
+    /**
+     * Verify a mentor
+     */
+    public function verifyMentor($userId) {
+        $stmt = $this->db->prepare(
+            "UPDATE mentor_profiles 
+             SET is_verified = 1, verification_date = NOW() 
+             WHERE user_id = ?"
+        );
+        return $stmt->execute([$userId]);
+    }
+    
+    /**
+     * Unverify a mentor
+     */
+    public function unverifyMentor($userId) {
+        $stmt = $this->db->prepare(
+            "UPDATE mentor_profiles 
+             SET is_verified = 0, verification_date = NULL 
+             WHERE user_id = ?"
+        );
+        return $stmt->execute([$userId]);
+    }
+    
+    /**
+     * Get mentor statistics
+     */
+    public function getStatistics() {
+        $stmt = $this->db->query(
+            "SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN is_verified = 1 THEN 1 ELSE 0 END) as verified,
+                SUM(CASE WHEN is_verified = 0 THEN 1 ELSE 0 END) as pending
+             FROM mentor_profiles mp
+             INNER JOIN users u ON mp.user_id = u.id
+             WHERE u.status = 'active'"
+        );
+        return $stmt->fetch();
+    }
 }
 ?>

@@ -168,13 +168,24 @@ class Auth {
     }
     
     /**
-     * Require specific role
+     * Require specific role(s)
+     * @param string|array $role Single role or array of allowed roles
      */
     public static function requireRole($role) {
         self::requireLogin();
-        if (!self::hasRole($role)) {
-            header('Location: /pages/unauthorized.php');
-            exit();
+        
+        // Support both single role and array of roles
+        if (is_array($role)) {
+            $currentRole = self::getCurrentUserRole();
+            if (!in_array($currentRole, $role)) {
+                header('Location: /pages/unauthorized.php');
+                exit();
+            }
+        } else {
+            if (!self::hasRole($role)) {
+                header('Location: /pages/unauthorized.php');
+                exit();
+            }
         }
     }
 }
