@@ -31,7 +31,15 @@ include __DIR__ . '/../../includes/header.php';
 <h2>Browse Mentors</h2>
 
 <div class="alert alert-info">
-    Mentors are sorted by compatibility based on your profile. Practice area match is mandatory.
+    <strong>About Match Score:</strong> Mentors are ranked by compatibility with your profile based on multiple factors:
+    <ul style="margin: 10px 0 0 20px;">
+        <li><strong>Practice Area (40%):</strong> Mandatory match with your preference</li>
+        <li><strong>Programme Level (20%):</strong> Alignment with your educational background</li>
+        <li><strong>Interests (15%):</strong> Similarity in professional interests</li>
+        <li><strong>Location (15%):</strong> Geographic proximity</li>
+        <li><strong>Language (10%):</strong> Language preference match</li>
+    </ul>
+    Higher scores indicate better compatibility. Practice area match is mandatory - only mentors in your preferred area are shown.
 </div>
 
 <?php if (empty($recommendedMentors)): ?>
@@ -55,7 +63,7 @@ include __DIR__ . '/../../includes/header.php';
             <p><strong>Bio:</strong> <?php echo htmlspecialchars(substr($mentor['bio'], 0, 200)); ?>...</p>
         <?php endif; ?>
         <p><strong>Availability:</strong> <?php echo $mentor['current_mentees']; ?> / <?php echo $mentor['max_mentees']; ?> mentees</p>
-        <p><strong>Match Score:</strong> <span class="badge badge-info"><?php echo round($mentor['match_score'], 1); ?>%</span></p>
+        <p><strong>Match Score:</strong> <span class="badge badge-info" title="Compatibility score based on practice area, programme, interests, location, and language"><?php echo round($mentor['match_score'], 1); ?>%</span></p>
         <a href="/pages/mentee/send_request.php?mentor_id=<?php echo $mentor['user_id']; ?>" class="btn">Send Request</a>
     </div>
     <?php endforeach; ?>

@@ -53,6 +53,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
                     }
                     break;
                     
+                case 'change_role':
+                    $newRole = $_POST['new_role'] ?? '';
+                    if (in_array($newRole, ['mentee', 'mentor', 'admin']) && $userClass->changeRole($userId, $newRole)) {
+                        $successCount++;
+                        AuditLog::log($currentUserId, 'role_changed', 'users', $userId, "Role changed from mentee to {$newRole}: {$user['email']}");
+                    } else {
+                        $failCount++;
+                    }
+                    break;
+                    
                 case 'disable':
                     if ($userClass->disableUser($userId)) {
                         $successCount++;
@@ -180,24 +190,32 @@ include __DIR__ . '/../../includes/header.php';
                 <select name="batch_action" id="batchAction" class="form-control" style="width: auto;">
                     <option value="">Batch Actions</option>
                     <option value="reset_password">Reset Password</option>
+                    <option value="change_role">Change Role</option>
                     <option value="disable">Disable</option>
                     <option value="enable">Enable</option>
                     <option value="delete">Delete</option>
                 </select>
                 
+                <select name="new_role" id="newRole" class="form-control" style="width: auto; display: none;">
+                    <option value="">Select Role</option>
+                    <option value="mentee">Mentee</option>
+                    <option value="mentor">Mentor</option>
+                    <option value="admin">Admin</option>
+                </select>
+                
                 <button type="submit" class="btn" onclick="return confirmBatchAction()">Apply</button>
             </div>
             
-            <table>
+            <table id="menteesTable">
                 <thead>
                     <tr>
                         <th style="width: 40px;">
                             <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)">
                         </th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Programme Level</th>
-                        <th>Status</th>
+                        <th onclick="sortTable(1)" style="cursor: pointer;">Name ▲▼</th>
+                        <th onclick="sortTable(2)" style="cursor: pointer;">Email ▲▼</th>
+                        <th onclick="sortTable(3)" style="cursor: pointer;">Programme Level ▲▼</th>
+                        <th onclick="sortTable(4)" style="cursor: pointer;">Status ▲▼</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -296,14 +314,66 @@ function confirmBatchAction() {
         return false;
     }
     
+    if (action === 'change_role') {
+        const newRole = document.getElementById('newRole').value;
+        if (!newRole) {
+            alert('Please select a new role');
+            return false;
+        }
+    }
+    
     const actionText = {
         'reset_password': 'reset passwords for',
+        'change_role': 'change roles for',
         'disable': 'disable',
         'enable': 'enable',
         'delete': 'DELETE'
     };
     
     return confirm(`Are you sure you want to ${actionText[action] || action} ${checked} user(s)?`);
+}
+
+document.getElementById('batchAction').addEventListener('change', function() {
+    const newRoleSelect = document.getElementById('newRole');
+    if (this.value === 'change_role') {
+        newRoleSelect.style.display = 'inline-block';
+    } else {
+        newRoleSelect.style.display = 'none';
+    }
+});
+
+function sortTable(columnIndex) {
+    const table = document.getElementById('menteesTable');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => !row.id || !row.id.startsWith('details-'));
+    
+    // Determine sort direction
+    const isAscending = table.dataset.sortDirection !== 'asc';
+    table.dataset.sortDirection = isAscending ? 'asc' : 'desc';
+    
+    rows.sort((a, b) => {
+        const aText = a.cells[columnIndex].textContent.trim().toLowerCase();
+        const bText = b.cells[columnIndex].textContent.trim().toLowerCase();
+        
+        if (isAscending) {
+            return aText.localeCompare(bText);
+        } else {
+            return bText.localeCompare(aText);
+        }
+    });
+    
+    // Re-append sorted rows
+    rows.forEach(row => {
+        tbody.appendChild(row);
+        // Move the details row along with the main row
+        const menteeId = row.querySelector('.user-checkbox')?.value;
+        if (menteeId) {
+            const detailsRow = document.getElementById('details-' + menteeId);
+            if (detailsRow) {
+                tbody.appendChild(detailsRow);
+            }
+        }
+    });
 }
 </script>
 

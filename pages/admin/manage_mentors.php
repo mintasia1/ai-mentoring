@@ -84,6 +84,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
                     }
                     break;
                     
+                case 'unverify':
+                    if ($mentorClass->unverifyMentor($userId)) {
+                        $successCount++;
+                        AuditLog::log($currentUserId, 'mentor_unverified', 'mentor_profiles', $userId, "Batch unverified mentor: {$user['email']}");
+                    } else {
+                        $failCount++;
+                    }
+                    break;
+                    
                 case 'reset_password':
                     $tempPassword = bin2hex(random_bytes(8));
                     if ($userClass->resetPassword($userId, $tempPassword)) {
@@ -222,6 +231,7 @@ include __DIR__ . '/../../includes/header.php';
                 <select name="batch_action" id="batchAction" class="form-control" style="width: auto;">
                     <option value="">Batch Actions</option>
                     <option value="verify">Verify</option>
+                    <option value="unverify">Unverify</option>
                     <option value="reset_password">Reset Password</option>
                     <option value="change_role">Change Role</option>
                     <option value="disable">Disable</option>
@@ -239,17 +249,17 @@ include __DIR__ . '/../../includes/header.php';
                 <button type="submit" class="btn" onclick="return confirmBatchAction()">Apply</button>
             </div>
             
-            <table>
+            <table id="mentorsTable">
                 <thead>
                     <tr>
                         <th style="width: 40px;">
                             <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)">
                         </th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Practice Area</th>
-                        <th>Verification Status</th>
-                        <th>User Status</th>
+                        <th onclick="sortTable(1)" style="cursor: pointer;">Name ▲▼</th>
+                        <th onclick="sortTable(2)" style="cursor: pointer;">Email ▲▼</th>
+                        <th onclick="sortTable(3)" style="cursor: pointer;">Practice Area ▲▼</th>
+                        <th onclick="sortTable(4)" style="cursor: pointer;">Verification Status ▲▼</th>
+                        <th onclick="sortTable(5)" style="cursor: pointer;">User Status ▲▼</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -403,6 +413,7 @@ function confirmBatchAction() {
     
     const actionText = {
         'verify': 'verify',
+        'unverify': 'unverify',
         'reset_password': 'reset passwords for',
         'change_role': 'change roles for',
         'disable': 'disable',
@@ -411,6 +422,40 @@ function confirmBatchAction() {
     };
     
     return confirm(`Are you sure you want to ${actionText[action] || action} ${checked} user(s)?`);
+}
+
+function sortTable(columnIndex) {
+    const table = document.getElementById('mentorsTable');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => !row.id || !row.id.startsWith('details-'));
+    
+    // Determine sort direction
+    const isAscending = table.dataset.sortDirection !== 'asc';
+    table.dataset.sortDirection = isAscending ? 'asc' : 'desc';
+    
+    rows.sort((a, b) => {
+        const aText = a.cells[columnIndex].textContent.trim().toLowerCase();
+        const bText = b.cells[columnIndex].textContent.trim().toLowerCase();
+        
+        if (isAscending) {
+            return aText.localeCompare(bText);
+        } else {
+            return bText.localeCompare(aText);
+        }
+    });
+    
+    // Re-append sorted rows
+    rows.forEach(row => {
+        tbody.appendChild(row);
+        // Move the details row along with the main row
+        const mentorId = row.querySelector('.user-checkbox')?.value;
+        if (mentorId) {
+            const detailsRow = document.getElementById('details-' + mentorId);
+            if (detailsRow) {
+                tbody.appendChild(detailsRow);
+            }
+        }
+    });
 }
 </script>
 
