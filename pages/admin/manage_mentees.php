@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/User.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
 require_once __DIR__ . '/../../classes/AuditLog.php';
+require_once __DIR__ . '/../../classes/Logger.php';
 
 Auth::requirePageAccess('admin_pages');
 
@@ -50,16 +51,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
                         // In production, send email with temp password
                     } else {
                         $failCount++;
+                        Logger::error("Failed to reset password for mentee", ['user_id' => $userId, 'email' => $user['email']]);
                     }
                     break;
                     
                 case 'change_role':
                     $newRole = $_POST['new_role'] ?? '';
-                    if (in_array($newRole, ['mentee', 'mentor', 'admin']) && $userClass->changeRole($userId, $newRole)) {
+                    if (empty($newRole)) {
+                        $failCount++;
+                        Logger::warning("Change role attempted without specifying new role", ['user_id' => $userId]);
+                    } elseif (in_array($newRole, ['mentee', 'mentor', 'admin']) && $userClass->changeRole($userId, $newRole)) {
                         $successCount++;
                         AuditLog::log($currentUserId, 'role_changed', 'users', $userId, "Role changed from mentee to {$newRole}: {$user['email']}");
                     } else {
                         $failCount++;
+                        Logger::error("Failed to change role for mentee", ['user_id' => $userId, 'email' => $user['email'], 'new_role' => $newRole]);
                     }
                     break;
                     
@@ -69,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
                         AuditLog::log($currentUserId, 'user_disabled', 'users', $userId, "Disabled mentee: {$user['email']}");
                     } else {
                         $failCount++;
+                        Logger::error("Failed to disable mentee", ['user_id' => $userId, 'email' => $user['email']]);
                     }
                     break;
                     
@@ -78,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
                         AuditLog::log($currentUserId, 'user_enabled', 'users', $userId, "Enabled mentee: {$user['email']}");
                     } else {
                         $failCount++;
+                        Logger::error("Failed to enable mentee", ['user_id' => $userId, 'email' => $user['email']]);
                     }
                     break;
                     
@@ -87,11 +95,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
                         AuditLog::log($currentUserId, 'user_deleted', 'users', $userId, "Deleted mentee: {$user['email']}");
                     } else {
                         $failCount++;
+                        Logger::error("Failed to delete mentee", ['user_id' => $userId, 'email' => $user['email']]);
                     }
                     break;
                     
                 default:
                     $failCount++;
+                    Logger::warning("Unknown batch action attempted", ['action' => $action, 'user_id' => $userId]);
             }
         }
         
