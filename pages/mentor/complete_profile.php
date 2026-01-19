@@ -27,35 +27,68 @@ $mentor_data = $mentorClass->getProfile($id_mentor_login);
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
-    $data = [
-        'alumni_id' => trim($_POST['alumni_id'] ?? ''),
-        'graduation_year' => intval($_POST['graduation_year'] ?? 0),
-        'programme_level' => $_POST['programme_level'] ?? '',
-        'practice_area' => $_POST['practice_area'] ?? '',
-        'current_position' => trim($_POST['current_position'] ?? ''),
-        'company' => trim($_POST['company'] ?? ''),
-        'expertise' => trim($_POST['expertise'] ?? ''),
-        'interests' => trim($_POST['interests'] ?? ''),
-        'language' => trim($_POST['language'] ?? ''),
-        'location' => trim($_POST['location'] ?? ''),
-        'bio' => trim($_POST['bio'] ?? ''),
-        'max_mentees' => intval($_POST['max_mentees'] ?? MAX_MENTEES_PER_MENTOR)
-    ];
+    $programme_level = $_POST['programme_level'] ?? '';
+    $practice_area = $_POST['practice_area'] ?? '';
     
-    if (empty($data['programme_level'])) {
-        $pesan = 'Programme level is required';
-        $pesan_type = 'error';
-    } elseif (empty($data['practice_area'])) {
-        $pesan = 'Practice area is required';
-        $pesan_type = 'error';
-    } else {
-        if ($mentorClass->saveProfile($id_mentor_login, $data)) {
-            $pesan = 'Profile successfully updated!';
-            $pesan_type = 'success';
-            $mentor_data = $mentorClass->getProfile($id_mentor_login);
-        } else {
-            $pesan = 'Failed to update profile';
+    // Handle "Other" option for programme level
+    if ($programme_level === 'Other') {
+        $programme_level_other = trim($_POST['programme_level_other'] ?? '');
+        if (!empty($programme_level_other)) {
+            // Validate: no double quotes
+            if (strpos($programme_level_other, '"') !== false) {
+                $pesan = 'Double quotes are not allowed in programme level';
+                $pesan_type = 'error';
+            } else {
+                $programme_level = $programme_level_other;
+            }
+        }
+    }
+    
+    // Handle "Other" option for practice area
+    if ($practice_area === 'Other') {
+        $practice_area_other = trim($_POST['practice_area_other'] ?? '');
+        if (!empty($practice_area_other)) {
+            // Validate: no double quotes
+            if (strpos($practice_area_other, '"') !== false) {
+                $pesan = 'Double quotes are not allowed in practice area';
+                $pesan_type = 'error';
+            } else {
+                $practice_area = $practice_area_other;
+            }
+        }
+    }
+    
+    if (!isset($pesan)) {
+        $data = [
+            'alumni_id' => trim($_POST['alumni_id'] ?? ''),
+            'graduation_year' => intval($_POST['graduation_year'] ?? 0),
+            'programme_level' => $programme_level,
+            'practice_area' => $practice_area,
+            'current_position' => trim($_POST['current_position'] ?? ''),
+            'company' => trim($_POST['company'] ?? ''),
+            'expertise' => trim($_POST['expertise'] ?? ''),
+            'interests' => trim($_POST['interests'] ?? ''),
+            'language' => trim($_POST['language'] ?? ''),
+            'location' => trim($_POST['location'] ?? ''),
+            'bio' => trim($_POST['bio'] ?? ''),
+            'max_mentees' => intval($_POST['max_mentees'] ?? MAX_MENTEES_PER_MENTOR)
+        ];
+        
+        if (empty($data['programme_level'])) {
+            $pesan = 'Programme level is required';
             $pesan_type = 'error';
+        } elseif (empty($data['practice_area'])) {
+            $pesan = 'Practice area is required';
+            $pesan_type = 'error';
+        } else {
+            if ($mentorClass->saveProfile($id_mentor_login, $data)) {
+                $pesan = 'Profile successfully updated!';
+                $pesan_type = 'success';
+                $mentor_data = $mentorClass->getProfile($id_mentor_login);
+            } else {
+                $pesan = 'Failed to update profile';
+                $pesan_type = 'error';
+            }
         }
     }
 }
@@ -134,6 +167,7 @@ include __DIR__ . '/../../includes/header.php';
                 type="text" 
                 id="alumni_id" 
                 name="alumni_id" 
+                maxlength="200"
                 value="<?php echo htmlspecialchars($mentor_data['alumni_id'] ?? ''); ?>" 
                 required
                 placeholder="e.g., A123456">
@@ -164,6 +198,19 @@ include __DIR__ . '/../../includes/header.php';
             </select>
         </div>
         
+        <div class="form-group" id="programme_level_other_div" style="display: none;">
+            <label for="programme_level_other">Please specify Programme Level <span class="required">*</span></label>
+            <input 
+                type="text" 
+                id="programme_level_other" 
+                name="programme_level_other" 
+                maxlength="200"
+                placeholder="Enter your programme level"
+                pattern="[A-Za-z0-9\s\.,;:!?\-\(\)]*"
+                title="Only alphabets, numbers, and punctuation allowed (no double quotes)">
+            <p class="info-text">Maximum 200 characters. Alphabets, numbers, and punctuation only (no double quotes)</p>
+        </div>
+        
         <h3>Professional Information</h3>
         
         <div class="form-group">
@@ -178,12 +225,26 @@ include __DIR__ . '/../../includes/header.php';
             </select>
         </div>
         
+        <div class="form-group" id="practice_area_other_div" style="display: none;">
+            <label for="practice_area_other">Please specify Practice Area <span class="required">*</span></label>
+            <input 
+                type="text" 
+                id="practice_area_other" 
+                name="practice_area_other" 
+                maxlength="200"
+                placeholder="Enter your practice area"
+                pattern="[A-Za-z0-9\s\.,;:!?\-\(\)]*"
+                title="Only alphabets, numbers, and punctuation allowed (no double quotes)">
+            <p class="info-text">Maximum 200 characters. Alphabets, numbers, and punctuation only (no double quotes)</p>
+        </div>
+        
         <div class="form-group">
             <label for="current_position">Current Position <span class="required">*</span></label>
             <input 
                 type="text" 
                 id="current_position" 
                 name="current_position" 
+                maxlength="200"
                 value="<?php echo htmlspecialchars($mentor_data['current_position'] ?? ''); ?>" 
                 required
                 placeholder="e.g., Senior Associate, Partner">
@@ -195,6 +256,7 @@ include __DIR__ . '/../../includes/header.php';
                 type="text" 
                 id="company" 
                 name="company" 
+                maxlength="200"
                 value="<?php echo htmlspecialchars($mentor_data['company'] ?? ''); ?>" 
                 required
                 placeholder="e.g., ABC Law Firm">
@@ -205,9 +267,10 @@ include __DIR__ . '/../../includes/header.php';
             <textarea 
                 id="bio" 
                 name="bio" 
+                maxlength="500"
                 required
                 placeholder="Tell mentees about yourself, your experience, and what you can offer as a mentor"><?php echo htmlspecialchars($mentor_data['bio'] ?? ''); ?></textarea>
-            <p class="info-text">This will be visible to mentees when they browse mentors.</p>
+            <p class="info-text">This will be visible to mentees when they browse mentors. Maximum 500 characters.</p>
         </div>
         
         <h3>Additional Information</h3>
@@ -217,6 +280,7 @@ include __DIR__ . '/../../includes/header.php';
             <textarea 
                 id="expertise" 
                 name="expertise" 
+                maxlength="500"
                 placeholder="List your key areas of expertise (e.g., M&A, Corporate Restructuring, Litigation)"><?php echo htmlspecialchars($mentor_data['expertise'] ?? ''); ?></textarea>
         </div>
         
@@ -225,6 +289,7 @@ include __DIR__ . '/../../includes/header.php';
             <textarea 
                 id="interests" 
                 name="interests"
+                maxlength="500"
                 placeholder="What are your professional interests?"><?php echo htmlspecialchars($mentor_data['interests'] ?? ''); ?></textarea>
         </div>
         
@@ -234,6 +299,7 @@ include __DIR__ . '/../../includes/header.php';
                 type="text" 
                 id="language" 
                 name="language" 
+                maxlength="200"
                 value="<?php echo htmlspecialchars($mentor_data['language'] ?? ''); ?>"
                 placeholder="e.g., English, Cantonese, Mandarin">
         </div>
@@ -244,6 +310,7 @@ include __DIR__ . '/../../includes/header.php';
                 type="text" 
                 id="location" 
                 name="location" 
+                maxlength="200"
                 value="<?php echo htmlspecialchars($mentor_data['location'] ?? ''); ?>"
                 placeholder="e.g., Hong Kong, Beijing">
         </div>
@@ -268,6 +335,69 @@ include __DIR__ . '/../../includes/header.php';
 </div>
 
 <script>
+    // Handle "Other" option selection
+    document.getElementById('programme_level').addEventListener('change', function() {
+        const otherDiv = document.getElementById('programme_level_other_div');
+        const otherInput = document.getElementById('programme_level_other');
+        
+        if (this.value === 'Other') {
+            otherDiv.style.display = 'block';
+            otherInput.required = true;
+        } else {
+            otherDiv.style.display = 'none';
+            otherInput.required = false;
+            otherInput.value = '';
+        }
+    });
+    
+    document.getElementById('practice_area').addEventListener('change', function() {
+        const otherDiv = document.getElementById('practice_area_other_div');
+        const otherInput = document.getElementById('practice_area_other');
+        
+        if (this.value === 'Other') {
+            otherDiv.style.display = 'block';
+            otherInput.required = true;
+        } else {
+            otherDiv.style.display = 'none';
+            otherInput.required = false;
+            otherInput.value = '';
+        }
+    });
+    
+    // Validate "Other" inputs - no double quotes
+    function validateOtherInput(input) {
+        if (input.value.includes('"')) {
+            alert('Double quotes (") are not allowed in this field');
+            input.value = input.value.replace(/"/g, '');
+            return false;
+        }
+        return true;
+    }
+    
+    document.getElementById('programme_level_other').addEventListener('input', function() {
+        validateOtherInput(this);
+    });
+    
+    document.getElementById('practice_area_other').addEventListener('input', function() {
+        validateOtherInput(this);
+    });
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const programmeLevel = document.getElementById('programme_level').value;
+        const practiceArea = document.getElementById('practice_area').value;
+        
+        if (programmeLevel === 'Other') {
+            document.getElementById('programme_level_other_div').style.display = 'block';
+            document.getElementById('programme_level_other').required = true;
+        }
+        
+        if (practiceArea === 'Other') {
+            document.getElementById('practice_area_other_div').style.display = 'block';
+            document.getElementById('practice_area_other').required = true;
+        }
+    });
+    
     // Form validation
     document.getElementById('profileForm').addEventListener('submit', function(e) {
         const required = ['alumni_id', 'graduation_year', 'programme_level', 'practice_area', 'current_position', 'company', 'bio'];
@@ -281,6 +411,42 @@ include __DIR__ . '/../../includes/header.php';
                 e.preventDefault();
                 alert('Please fill in all required fields (marked with *)');
                 element.focus();
+                return false;
+            }
+        }
+        
+        // Check if "Other" is selected and validate the custom input
+        const programmeLevel = document.getElementById('programme_level').value;
+        const practiceArea = document.getElementById('practice_area').value;
+        
+        if (programmeLevel === 'Other') {
+            const otherInput = document.getElementById('programme_level_other');
+            if (!otherInput.value.trim()) {
+                e.preventDefault();
+                alert('Please specify your programme level');
+                otherInput.focus();
+                return false;
+            }
+            if (otherInput.value.includes('"')) {
+                e.preventDefault();
+                alert('Double quotes are not allowed in programme level');
+                otherInput.focus();
+                return false;
+            }
+        }
+        
+        if (practiceArea === 'Other') {
+            const otherInput = document.getElementById('practice_area_other');
+            if (!otherInput.value.trim()) {
+                e.preventDefault();
+                alert('Please specify your practice area');
+                otherInput.focus();
+                return false;
+            }
+            if (otherInput.value.includes('"')) {
+                e.preventDefault();
+                alert('Double quotes are not allowed in practice area');
+                otherInput.focus();
                 return false;
             }
         }
