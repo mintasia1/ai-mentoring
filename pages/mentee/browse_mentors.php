@@ -104,7 +104,7 @@ include __DIR__ . '/../../includes/header.php';
                     <td><?php echo $mentor['location'] ? htmlspecialchars($mentor['location']) : '<span style="color: #999;">N/A</span>'; ?></td>
                     <td><?php echo $mentor['current_mentees']; ?> / <?php echo $mentor['max_mentees']; ?></td>
                     <td>
-                        <a href="/pages/mentee/send_request.php?mentor_id=<?php echo $mentor['user_id']; ?>" class="btn">Send Request</a>
+                        <button onclick="openSendRequestModal(<?php echo $mentor['user_id']; ?>, '<?php echo htmlspecialchars(addslashes($mentor['first_name'] . ' ' . $mentor['last_name'])); ?>')" class="btn">Send Request</button>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -137,48 +137,28 @@ include __DIR__ . '/../../includes/header.php';
         </div>
     </div>
 
-    <script>
-    function sortTable(columnIndex) {
-        const table = document.getElementById("mentorsTable");
-        const tbody = table.getElementsByTagName("tbody")[0];
-        const rows = Array.from(tbody.getElementsByTagName("tr"));
-        
-        // Determine sort direction
-        const currentSort = table.getAttribute("data-sort-col");
-        const currentDir = table.getAttribute("data-sort-dir");
-        let sortDir = "asc";
-        
-        if (currentSort == columnIndex && currentDir == "asc") {
-            sortDir = "desc";
-        }
-        
-        // Sort rows
-        rows.sort(function(a, b) {
-            let aVal = a.getElementsByTagName("td")[columnIndex].textContent.trim();
-            let bVal = b.getElementsByTagName("td")[columnIndex].textContent.trim();
-            
-            // Handle numeric values (Match Score and Availability)
-            if (columnIndex === 0) { // Match Score
-                aVal = parseFloat(aVal);
-                bVal = parseFloat(bVal);
-            } else if (columnIndex === 6) { // Availability
-                aVal = parseInt(aVal.split('/')[0]);
-                bVal = parseInt(bVal.split('/')[0]);
-            }
-            
-            if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
-            if (aVal > bVal) return sortDir === "asc" ? 1 : -1;
-            return 0;
-        });
-        
-        // Reorder rows
-        rows.forEach(row => tbody.appendChild(row));
-        
-        // Store sort state
-        table.setAttribute("data-sort-col", columnIndex);
-        table.setAttribute("data-sort-dir", sortDir);
-    }
-    </script>
+    <!-- Send Request Modal -->
+    <div id="sendRequestModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeSendRequestModal()" class="modal-close">&times;</span>
+            <h3 style="margin-top: 0;">Send Mentorship Request</h3>
+            <p>Send a mentorship request to <strong id="mentorNameDisplay"></strong></p>
+            <form id="sendRequestForm" method="POST" action="/pages/mentee/send_request.php">
+                <input type="hidden" name="mentor_id" id="modal_mentor_id" value="">
+                <div class="form-group">
+                    <label for="modal_message">Message (Optional):</label>
+                    <textarea id="modal_message" name="message" rows="4" maxlength="500" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Introduce yourself and explain why you'd like to connect with this mentor..."></textarea>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 5px;">Maximum 500 characters</p>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn" style="margin-right: 10px;">Send Request</button>
+                    <button type="button" onclick="closeSendRequestModal()" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 <?php endif; ?>
+
+<script src="/assets/js/browse-mentors.js"></script>
 <?php include __DIR__ . "/../../includes/footer.php"; ?>
  
