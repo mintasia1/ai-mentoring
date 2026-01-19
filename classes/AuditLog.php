@@ -55,4 +55,14 @@ class AuditLog {
         $stmt->execute([$limit, $offset]);
         return $stmt->fetchAll();
     }
+    
+    /**
+     * Get total count of logs
+     */
+    public static function getTotal() {
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->query("SELECT COUNT(*) as count FROM audit_logs");
+        $result = $stmt->fetch();
+        return $result['count'];
+    }
 }

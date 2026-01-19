@@ -23,8 +23,18 @@ $totalMentors = $userClass->countUsers('mentor');
 $totalAdmins = $userClass->countUsers('admin');
 $totalSuperAdmins = $userClass->countUsers('super_admin');
 
-// Get recent audit logs
-$recentLogs = AuditLog::getAllLogs(20);
+// Get pagination parameters
+$auditPage = isset($_GET['audit_page']) ? max(1, intval($_GET['audit_page'])) : 1;
+$auditPerPage = isset($_GET['audit_per_page']) ? intval($_GET['audit_per_page']) : 10;
+if (!in_array($auditPerPage, [10, 25, 50, 100])) {
+    $auditPerPage = 10;
+}
+$auditOffset = ($auditPage - 1) * $auditPerPage;
+
+// Get recent audit logs with pagination
+$recentLogs = AuditLog::getAllLogs($auditPerPage, $auditOffset);
+$totalAuditLogs = AuditLog::getTotal();
+$totalAuditPages = ceil($totalAuditLogs / $auditPerPage);
 
 include __DIR__ . '/../../includes/header.php';
 ?>
@@ -68,7 +78,33 @@ include __DIR__ . '/../../includes/header.php';
 </div>
 
 <div class="card">
-    <h3>Recent Activity (Audit Logs)</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0;">Recent Activity (Audit Logs)</h3>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <label for="auditPerPage" style="margin: 0;">Rows:</label>
+            <select id="auditPerPage" onchange="changeAuditPerPage(this.value)" style="padding: 5px;">
+                <option value="10" <?php echo $auditPerPage == 10 ? 'selected' : ''; ?>>10</option>
+                <option value="25" <?php echo $auditPerPage == 25 ? 'selected' : ''; ?>>25</option>
+                <option value="50" <?php echo $auditPerPage == 50 ? 'selected' : ''; ?>>50</option>
+                <option value="100" <?php echo $auditPerPage == 100 ? 'selected' : ''; ?>>100</option>
+            </select>
+        </div>
+    </div>
+    
+    <?php if ($totalAuditPages > 1): ?>
+    <div style="margin-bottom: 15px; text-align: center;">
+        <?php if ($auditPage > 1): ?>
+            <a href="?audit_page=<?php echo $auditPage - 1; ?>&audit_per_page=<?php echo $auditPerPage; ?>" class="btn btn-secondary" style="padding: 5px 10px;">« Previous</a>
+        <?php endif; ?>
+        
+        <span style="margin: 0 15px;">Page <?php echo $auditPage; ?> of <?php echo $totalAuditPages; ?></span>
+        
+        <?php if ($auditPage < $totalAuditPages): ?>
+            <a href="?audit_page=<?php echo $auditPage + 1; ?>&audit_per_page=<?php echo $auditPerPage; ?>" class="btn btn-secondary" style="padding: 5px 10px;">Next »</a>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+    
     <?php if (empty($recentLogs)): ?>
         <p>No recent activity.</p>
     <?php else: ?>
@@ -102,9 +138,30 @@ include __DIR__ . '/../../includes/header.php';
                 <?php endforeach; ?>
             </tbody>
         </table>
+        
+        <?php if ($totalAuditPages > 1): ?>
+        <div style="margin-top: 15px; text-align: center;">
+            <?php if ($auditPage > 1): ?>
+                <a href="?audit_page=<?php echo $auditPage - 1; ?>&audit_per_page=<?php echo $auditPerPage; ?>" class="btn btn-secondary" style="padding: 5px 10px;">« Previous</a>
+            <?php endif; ?>
+            
+            <span style="margin: 0 15px;">Page <?php echo $auditPage; ?> of <?php echo $totalAuditPages; ?></span>
+            
+            <?php if ($auditPage < $totalAuditPages): ?>
+                <a href="?audit_page=<?php echo $auditPage + 1; ?>&audit_per_page=<?php echo $auditPerPage; ?>" class="btn btn-secondary" style="padding: 5px 10px;">Next »</a>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+        
         <a href="/pages/super_admin/audit_logs.php" class="btn btn-secondary" style="margin-top: 10px;">View All Logs</a>
     <?php endif; ?>
 </div>
+
+<script>
+function changeAuditPerPage(perPage) {
+    window.location.href = '?audit_page=1&audit_per_page=' + perPage;
+}
+</script>
 
 <div class="card">
     <h3>System Information</h3>
