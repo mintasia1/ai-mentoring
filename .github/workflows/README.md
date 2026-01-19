@@ -4,7 +4,30 @@ This directory contains the GitHub Actions workflow for automated deployment to 
 
 ## Workflow: deploy.yml
 
-Automatically deploys the application to SiteGround when code is pushed to the `main` branch.
+Automatically deploys the application to SiteGround when code is pushed to the `copilot/add-ztest-page` branch or manually triggered.
+
+### Deployment Triggers
+
+The deployment workflow triggers automatically in these scenarios:
+
+1. **Push to copilot/add-ztest-page branch** - When Copilot merges changes into this branch and pushes them
+2. **Manual dispatch** - Can be manually triggered from GitHub Actions tab
+
+### How Copilot Triggers Deployment
+
+When Copilot merges code into `copilot/add-ztest-page`:
+1. Copilot uses `report_progress` or commits changes to the branch
+2. Changes are automatically pushed to `origin/copilot/add-ztest-page`
+3. GitHub Actions detects the push event
+4. Deploy workflow runs automatically
+
+You can also manually trigger the deployment:
+1. Go to GitHub Actions tab
+2. Select "Deploy to SiteGround" workflow
+3. Click "Run workflow"
+4. Select branch `copilot/add-ztest-page`
+5. Optionally add a reason for deployment
+6. Click "Run workflow" button
 
 ### Required GitHub Secrets
 
@@ -26,6 +49,8 @@ Configure these secrets in your repository settings (`Settings > Secrets and var
 ### Deployment Details
 
 **Target Directory**: `~/public_html/` on your SiteGround server
+
+**Deployment Branch**: `copilot/add-ztest-page` (configured for testing deployments)
 
 **Excluded Files/Directories**:
 - `.git` - Git repository data
@@ -62,14 +87,16 @@ ssh-keygen -t rsa -b 4096 -C "github-actions@yourproject.com"
 ### Testing the Deployment
 
 1. Make a small change to any file
-2. Commit and push to `main` branch:
+2. Commit and push to `copilot/add-ztest-page` branch:
    ```bash
    git add .
    git commit -m "Test deployment"
-   git push origin main
+   git push origin copilot/add-ztest-page
    ```
 3. Go to GitHub → Actions tab
 4. Watch the deployment progress
+
+**Note**: When Copilot makes changes, it automatically commits and pushes to trigger deployment.
 
 ### Troubleshooting
 

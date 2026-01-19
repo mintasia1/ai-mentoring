@@ -5,6 +5,12 @@ on:
     branches:
       # - main
       - copilot/add-ztest-page
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual deployment'
+        required: false
+        default: 'Manual deployment triggered'
 
 jobs:
   deploy:
