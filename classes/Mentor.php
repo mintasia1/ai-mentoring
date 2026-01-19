@@ -133,15 +133,14 @@ class Mentor {
      * Get all mentors with profiles (for admin)
      */
     public function getAllMentors($filter = 'all') {
-        $sql = "SELECT u.id, u.first_name, u.last_name, u.email, mp.* 
+        $sql = "SELECT u.id, u.first_name, u.last_name, u.email, u.status, mp.* 
                 FROM users u 
-                INNER JOIN mentor_profiles mp ON u.id = mp.user_id 
-                WHERE u.status = 'active'";
+                INNER JOIN mentor_profiles mp ON u.id = mp.user_id";
         
         if ($filter === 'verified') {
-            $sql .= " AND mp.is_verified = 1";
+            $sql .= " WHERE mp.is_verified = 1";
         } elseif ($filter === 'pending') {
-            $sql .= " AND mp.is_verified = 0";
+            $sql .= " WHERE mp.is_verified = 0";
         }
         
         $sql .= " ORDER BY mp.is_verified ASC, mp.created_at DESC";
