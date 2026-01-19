@@ -31,6 +31,18 @@ if (!$mentorProfile) {
     exit();
 }
 
+// Check if mentor is verified and active
+if (!$mentorProfile['is_verified']) {
+    header('Location: /pages/mentee/browse_mentors.php?error=mentor_not_verified');
+    exit();
+}
+
+// Check if mentor has capacity
+if (!$mentorClass->hasCapacity($mentorId)) {
+    header('Location: /pages/mentee/browse_mentors.php?error=mentor_no_capacity');
+    exit();
+}
+
 $menteeClass = new Mentee();
 $menteeProfile = $menteeClass->getProfile($userId);
 
