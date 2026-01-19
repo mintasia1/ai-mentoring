@@ -124,7 +124,11 @@ class Mentee {
      */
     public function getAllMentees() {
         // Only show users who have mentee profiles (exclude users who only have mentor profiles)
-        $sql = "SELECT u.id, u.first_name, u.last_name, u.email, u.status, mp.* 
+        $sql = "SELECT u.id AS user_id, u.first_name, u.last_name, u.email, u.status,
+                       mp.user_id, mp.student_id, mp.programme_level, mp.year_of_study,
+                       mp.practice_area_preference, mp.interests, mp.language_preference,
+                       mp.location, mp.goals, mp.bio, mp.rematch_count,
+                       mp.created_at, mp.updated_at
                 FROM users u 
                 INNER JOIN mentee_profiles mp ON u.id = mp.user_id 
                 ORDER BY mp.created_at DESC";

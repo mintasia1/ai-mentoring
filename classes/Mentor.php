@@ -134,7 +134,12 @@ class Mentor {
      */
     public function getAllMentors($filter = 'all') {
         // Only show users who have mentor profiles (exclude users who only have mentee profiles)
-        $sql = "SELECT u.id, u.first_name, u.last_name, u.email, u.status, mp.* 
+        $sql = "SELECT u.id AS user_id, u.first_name, u.last_name, u.email, u.status, 
+                       mp.user_id, mp.alumni_id, mp.graduation_year, mp.programme_level, 
+                       mp.practice_area, mp.current_position, mp.company, mp.expertise, 
+                       mp.interests, mp.language, mp.location, mp.bio, mp.max_mentees, 
+                       mp.current_mentees, mp.is_verified, mp.verification_date, 
+                       mp.created_at, mp.updated_at
                 FROM users u 
                 INNER JOIN mentor_profiles mp ON u.id = mp.user_id
                 WHERE 1=1";

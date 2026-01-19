@@ -275,7 +275,7 @@ include __DIR__ . '/../../includes/header.php';
                     <?php foreach ($mentees as $mentee): ?>
                     <tr>
                         <td>
-                            <input type="checkbox" name="selected_users[]" value="<?php echo $mentee['id']; ?>" class="user-checkbox">
+                            <input type="checkbox" name="selected_users[]" value="<?php echo $mentee['user_id']; ?>" class="user-checkbox">
                         </td>
                         <td><?php echo htmlspecialchars($mentee['first_name'] . ' ' . $mentee['last_name']); ?></td>
                         <td><?php echo htmlspecialchars($mentee['email']); ?></td>
@@ -290,10 +290,10 @@ include __DIR__ . '/../../includes/header.php';
                             <?php endif; ?>
                         </td>
                         <td>
-                            <button type="button" onclick="toggleDetails(<?php echo $mentee['id']; ?>)" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">View Details</button>
+                            <button type="button" onclick="toggleDetails(<?php echo $mentee['user_id']; ?>)" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">View Details</button>
                         </td>
                     </tr>
-                    <tr id="details-<?php echo $mentee['id']; ?>" style="display: none;">
+                    <tr id="details-<?php echo $mentee['user_id']; ?>" style="display: none;">
                         <td colspan="6" style="background: #f8f9fa; padding: 20px;">
                             <h4>Profile Details</h4>
                             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
