@@ -23,16 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF Protection
     $csrfToken = $_POST['csrf_token'] ?? '';
     if (!CSRFToken::validate($csrfToken)) {
-        $error = 'Security token validation failed. Please try again.';
+        $error = 'Invalid request. Please try again.';
     }
     // Honeypot check
     elseif (!SpamProtection::checkHoneypot()) {
-        $error = 'Spam detected. Please try again.';
+        $error = 'Invalid request. Please try again.';
     }
     // Rate limiting check
     elseif (!SpamProtection::checkRateLimit('register', RATE_LIMIT_REGISTER, RATE_LIMIT_WINDOW)) {
-        $timeLeft = SpamProtection::getRateLimitTimeLeft('register', RATE_LIMIT_WINDOW);
-        $error = "Too many registration attempts. Please try again in " . ceil($timeLeft / 60) . " minutes.";
+        $error = 'Invalid request. Please try again.';
     }
     else {
         $email = trim($_POST['email'] ?? '');
