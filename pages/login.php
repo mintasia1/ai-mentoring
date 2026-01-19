@@ -6,6 +6,8 @@
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../classes/Auth.php';
+require_once __DIR__ . '/../classes/CSRFToken.php';
+require_once __DIR__ . '/../classes/SpamProtection.php';
 
 $pageTitle = 'Login - ' . APP_NAME;
 $error = '';
@@ -18,21 +20,40 @@ if (Auth::isLoggedIn()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    
-    if (empty($email) || empty($password)) {
-        $error = 'Please provide email and password';
-    } else {
-        $auth = new Auth();
-        $result = $auth->login($email, $password);
+    // CSRF Protection
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (!CSRFToken::validate($csrfToken)) {
+        $error = 'Invalid request. Please try again.';
+    }
+    // Honeypot check
+    elseif (!SpamProtection::checkHoneypot()) {
+        $error = 'Invalid request. Please try again.';
+    }
+    // Rate limiting check
+    elseif (!SpamProtection::checkRateLimit('login', RATE_LIMIT_LOGIN, RATE_LIMIT_WINDOW)) {
+        $error = 'Invalid request. Please try again.';
+    }
+    else {
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
         
-        if ($result['success']) {
-            $role = $result['user']['role'];
-            header("Location: /pages/$role/dashboard.php");
-            exit();
+        if (empty($email) || empty($password)) {
+            $error = 'Please provide email and password';
+            SpamProtection::recordAttempt('login');
         } else {
-            $error = $result['message'];
+            $auth = new Auth();
+            $result = $auth->login($email, $password);
+            
+            if ($result['success']) {
+                // Success - destroy token and redirect
+                CSRFToken::destroy();
+                $role = $result['user']['role'];
+                header("Location: /pages/$role/dashboard.php");
+                exit();
+            } else {
+                $error = $result['message'];
+                SpamProtection::recordAttempt('login');
+            }
         }
     }
 }
@@ -52,6 +73,9 @@ include __DIR__ . '/../includes/header.php';
     <?php endif; ?>
     
     <form method="POST" action="">
+        <?php echo CSRFToken::getField(); ?>
+        <?php echo SpamProtection::getHoneypotField(); ?>
+        
         <div class="form-group">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>

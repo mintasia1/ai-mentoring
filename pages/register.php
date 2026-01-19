@@ -6,6 +6,8 @@
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../classes/Auth.php';
+require_once __DIR__ . '/../classes/CSRFToken.php';
+require_once __DIR__ . '/../classes/SpamProtection.php';
 
 $pageTitle = 'Register - ' . APP_NAME;
 $error = '';
@@ -18,27 +20,47 @@ if (Auth::isLoggedIn()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirmPassword = $_POST['confirm_password'] ?? '';
-    $role = $_POST['role'] ?? '';
-    $firstName = trim($_POST['first_name'] ?? '');
-    $lastName = trim($_POST['last_name'] ?? '');
-    
-    if (empty($email) || empty($password) || empty($role) || empty($firstName) || empty($lastName)) {
-        $error = 'All fields are required';
-    } elseif ($password !== $confirmPassword) {
-        $error = 'Passwords do not match';
-    } elseif (!in_array($role, ['mentee', 'mentor'])) {
-        $error = 'Invalid role selected';
-    } else {
-        $auth = new Auth();
-        $result = $auth->register($email, $password, $role, $firstName, $lastName);
+    // CSRF Protection
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (!CSRFToken::validate($csrfToken)) {
+        $error = 'Invalid request. Please try again.';
+    }
+    // Honeypot check
+    elseif (!SpamProtection::checkHoneypot()) {
+        $error = 'Invalid request. Please try again.';
+    }
+    // Rate limiting check
+    elseif (!SpamProtection::checkRateLimit('register', RATE_LIMIT_REGISTER, RATE_LIMIT_WINDOW)) {
+        $error = 'Invalid request. Please try again.';
+    }
+    else {
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+        $role = $_POST['role'] ?? '';
+        $firstName = trim($_POST['first_name'] ?? '');
+        $lastName = trim($_POST['last_name'] ?? '');
         
-        if ($result['success']) {
-            $success = 'Registration successful! Please login.';
+        if (empty($email) || empty($password) || empty($role) || empty($firstName) || empty($lastName)) {
+            $error = 'All fields are required';
+            SpamProtection::recordAttempt('register');
+        } elseif ($password !== $confirmPassword) {
+            $error = 'Passwords do not match';
+            SpamProtection::recordAttempt('register');
+        } elseif (!in_array($role, ['mentee', 'mentor'])) {
+            $error = 'Invalid role selected';
+            SpamProtection::recordAttempt('register');
         } else {
-            $error = $result['message'];
+            $auth = new Auth();
+            $result = $auth->register($email, $password, $role, $firstName, $lastName);
+            
+            if ($result['success']) {
+                $success = 'Registration successful! Please login.';
+                CSRFToken::destroy(); // Destroy token on success
+            } else {
+                $error = $result['message'];
+                SpamProtection::recordAttempt('register');
+            }
         }
     }
 }
@@ -58,6 +80,9 @@ include __DIR__ . '/../includes/header.php';
     <?php endif; ?>
     
     <form method="POST" action="">
+        <?php echo CSRFToken::getField(); ?>
+        <?php echo SpamProtection::getHoneypotField(); ?>
+        
         <div class="form-group">
             <label for="role">I am a:</label>
             <select id="role" name="role" required>
