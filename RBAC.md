@@ -1,5 +1,7 @@
 # Role-Based Access Control (RBAC) Documentation
 
+> **Note**: This RBAC system was merged from `copilot/simplify-mentors-navigation` branch into `copilot/add-ztest-page` branch.
+
 ## Overview
 
 The CUHK Law E-Mentoring Platform implements a centralized Role-Based Access Control (RBAC) system to manage page access permissions. This system makes it easier to maintain and update role permissions across the application.
