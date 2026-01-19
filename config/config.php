@@ -54,3 +54,18 @@ define('ROLE_PERMISSIONS', [
 // Input validation patterns
 define('OTHER_INPUT_PATTERN', '[A-Za-z0-9\s.,;:!?\(\)\-<>]*');
 define('OTHER_INPUT_DESCRIPTION', 'Only alphabets, numbers, and punctuation allowed (no double quotes)');
+
+// Logging settings
+// LOG_LEVEL determines which messages are logged
+// Available levels (in order of severity):
+//   'ERROR'   - Only errors (most restrictive)
+//   'WARNING' - Errors + warnings
+//   'INFO'    - Errors + warnings + info messages
+//   'DEBUG'   - All messages including debug (least restrictive)
+// 
+// Examples:
+//   define('LOG_LEVEL', 'ERROR');   // Only log errors
+//   define('LOG_LEVEL', 'WARNING'); // Log errors and warnings
+//   define('LOG_LEVEL', 'INFO');    // Log errors, warnings, and info
+//   define('LOG_LEVEL', 'DEBUG');   // Log everything including debug messages
+define('LOG_LEVEL', 'WARNING'); // Default: log errors and warnings

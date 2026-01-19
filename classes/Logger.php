@@ -9,6 +9,29 @@ class Logger {
     private static string $logFile = 'php_error.log';
     private static int $maxFileSize = 5242880; // 5MB in bytes
     
+    // Log level hierarchy (lower number = higher priority)
+    private static array $logLevels = [
+        'ERROR' => 1,
+        'WARNING' => 2,
+        'INFO' => 3,
+        'DEBUG' => 4
+    ];
+    
+    /**
+     * Check if a log level should be logged based on configured LOG_LEVEL
+     */
+    private static function shouldLog(string $level): bool {
+        $configuredLevel = defined('LOG_LEVEL') ? LOG_LEVEL : 'WARNING';
+        
+        // If configured level is not valid, default to WARNING
+        if (!isset(self::$logLevels[$configuredLevel])) {
+            $configuredLevel = 'WARNING';
+        }
+        
+        // Log if the message level is equal to or higher priority than configured level
+        return self::$logLevels[$level] <= self::$logLevels[$configuredLevel];
+    }
+    
     /**
      * Log an error message
      */
@@ -42,6 +65,11 @@ class Logger {
      */
     private static function log(string $level, string $message, array $context = []): void {
         try {
+            // Check if this log level should be logged
+            if (!self::shouldLog($level)) {
+                return;
+            }
+            
             // Ensure log directory exists
             if (!is_dir(self::$logDir)) {
                 mkdir(self::$logDir, 0755, true);
