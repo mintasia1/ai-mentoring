@@ -75,6 +75,7 @@ jobs:
           SG_SERVER: ${{ secrets.SG_SERVER }}
           SG_PORT: ${{ secrets.SG_PORT }}
           SG_USER: ${{ secrets.SG_USER }}
+          SG_PATH: ${{ secrets.SG_PATH }}
         run: |
           echo "Starting deployment to $SG_SERVER..."
           rsync -avz --checksum --delete \
@@ -84,7 +85,7 @@ jobs:
             --exclude='node_modules' \
             --exclude='.env' \
             --exclude='*.log' \
-            ./ ${SG_USER}@${SG_SERVER}:~/public_html/
+            ./ ${SG_USER}@${SG_SERVER}:${SG_PATH}
           echo "✓ Files uploaded successfully"
       
       - name: Cleanup SSH Key
