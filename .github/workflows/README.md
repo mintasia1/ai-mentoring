@@ -23,11 +23,17 @@ When Copilot merges code into `copilot/add-ztest-page`:
 
 You can also manually trigger the deployment:
 1. Go to GitHub Actions tab
-2. Select "Deploy to SiteGround" workflow
-3. Click "Run workflow"
+2. Select "Deploy to SiteGround" workflow from the left sidebar
+3. Click "Run workflow" button (appears on the right side)
 4. Select branch `copilot/add-ztest-page`
 5. Optionally add a reason for deployment
-6. Click "Run workflow" button
+6. Click the green "Run workflow" button to confirm
+
+**Note**: The "Run workflow" button only appears after the workflow file with `workflow_dispatch` trigger has been pushed to the remote repository. If you don't see it:
+- Ensure the workflow file is pushed to GitHub: `git push origin copilot/add-ztest-page`
+- Wait a few seconds for GitHub to process the workflow file
+- Refresh the Actions page
+- Check you're viewing the correct workflow (Deploy to SiteGround)
 
 ### Required GitHub Secrets
 
@@ -99,6 +105,13 @@ ssh-keygen -t rsa -b 4096 -C "github-actions@yourproject.com"
 **Note**: When Copilot makes changes, it automatically commits and pushes to trigger deployment.
 
 ### Troubleshooting
+
+**"Run workflow" button not visible**
+- The button only appears after the workflow file is pushed to GitHub
+- Ensure you've pushed the branch: `git push origin copilot/add-ztest-page`
+- Refresh the GitHub Actions page after pushing
+- The button appears on the right side when viewing a workflow with `workflow_dispatch` trigger
+- Check you're on the correct workflow page (Deploy to SiteGround)
 
 **Authentication Failed**
 - Verify SSH key is correctly added to GitHub Secrets
