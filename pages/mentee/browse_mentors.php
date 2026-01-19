@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/Matching.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
 
-Auth::requireRole('mentee');
+Auth::requireRole(['mentee', 'mentor', 'admin', 'super_admin']);
 
 $pageTitle = 'Browse Mentors';
 $userId = Auth::getCurrentUserId();

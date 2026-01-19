@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../classes/User.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
 require_once __DIR__ . '/../../classes/Mentorship.php';
 
-Auth::requireRole('mentee');
+Auth::requireRole(['mentee', 'mentor', 'admin', 'super_admin']);
 
 $pageTitle = 'Mentee Dashboard';
 $userId = Auth::getCurrentUserId();
