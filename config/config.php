@@ -52,5 +52,5 @@ define('ROLE_PERMISSIONS', [
 ]);
 
 // Input validation patterns
-define('OTHER_INPUT_PATTERN', '[A-Za-z0-9\s\.,;:!?\-\(\)]*');
+define('OTHER_INPUT_PATTERN', '[A-Za-z0-9\s.,;:!?\(\)-]*');
 define('OTHER_INPUT_DESCRIPTION', 'Only alphabets, numbers, and punctuation allowed (no double quotes)');

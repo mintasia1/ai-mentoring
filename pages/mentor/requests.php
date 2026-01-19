@@ -26,7 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $response = trim($_POST['response'] ?? '');
     
-    if ($action === 'accept') {
+    // Verify the request belongs to this mentor
+    $stmt = $this->db->prepare("SELECT mentor_id FROM mentorship_requests WHERE id = ?");
+    $stmt->execute([$requestId]);
+    $requestCheck = $stmt->fetch();
+    
+    if (!$requestCheck || $requestCheck['mentor_id'] != $userId) {
+        $message = 'Invalid request or unauthorized access';
+        $messageType = 'error';
+    } elseif ($action === 'accept') {
         $result = $mentorshipClass->acceptRequest($requestId, $userId, $response);
         if ($result['success']) {
             $message = 'Request accepted successfully!';
@@ -154,7 +162,7 @@ include __DIR__ . '/../../includes/header.php';
                     </td>
                     <td>
                         <?php if ($request['status'] === 'pending'): ?>
-                            <button type="button" onclick="showRequestModal(<?php echo $request['id']; ?>, '<?php echo htmlspecialchars(addslashes($request['first_name'] . ' ' . $request['last_name'])); ?>', '<?php echo htmlspecialchars(addslashes($request['message'] ?? '')); ?>')" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">Review</button>
+                            <button type="button" onclick='showRequestModal(<?php echo $request['id']; ?>, <?php echo json_encode($request['first_name'] . ' ' . $request['last_name']); ?>, <?php echo json_encode($request['message'] ?? ''); ?>)' class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">Review</button>
                         <?php else: ?>
                             <button type="button" onclick="toggleDetails(<?php echo $request['id']; ?>)" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">View Details</button>
                         <?php endif; ?>
