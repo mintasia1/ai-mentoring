@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/Matching.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
+require_once __DIR__ . '/../../classes/Mentorship.php';
 
 Auth::requirePageAccess('mentee_pages');
 
@@ -21,6 +22,11 @@ if (!$profile) {
     header('Location: /pages/mentee/profile.php?error=complete_profile');
     exit();
 }
+
+// Get all pending requests for this mentee
+$mentorshipClass = new Mentorship();
+$pendingRequests = $mentorshipClass->getMenteeRequests($userId, 'pending');
+$pendingMentorIds = array_column($pendingRequests, 'mentor_id');
 
 $matchingClass = new Matching();
 $allRecommendedMentors = $matchingClass->getRecommendedMentors($userId, 100); // Get more for pagination
@@ -44,6 +50,29 @@ include __DIR__ . '/../../includes/header.php';
 <h2>Browse Mentors
     <span style="cursor: help; margin-left: 10px;" title="Match Score: Mentors are ranked by compatibility based on Practice Area (40%), Programme Level (20%), Interests (15%), Location (15%), and Language (10%). Only verified mentors in your preferred practice area are shown.">ℹ️</span>
 </h2>
+
+<?php
+// Display error messages
+if (isset($_GET['error'])):
+    $errorMessages = [
+        'invalid_mentor' => 'Invalid mentor selected.',
+        'mentor_not_found' => 'Mentor not found.',
+        'mentor_not_verified' => 'This mentor is not verified.',
+        'mentor_no_capacity' => 'This mentor has no available capacity.',
+        'request_pending' => 'You already have a pending request with this mentor.'
+    ];
+    $errorMsg = $errorMessages[$_GET['error']] ?? 'An error occurred.';
+?>
+    <div class="alert alert-error">
+        <?php echo htmlspecialchars($errorMsg); ?>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($_GET['success']) && $_GET['success'] === 'request_sent'): ?>
+    <div class="alert alert-success">
+        Your mentorship request has been sent successfully!
+    </div>
+<?php endif; ?>
 
 <?php if (empty($allRecommendedMentors)): ?>
     <div class="card">
@@ -104,7 +133,11 @@ include __DIR__ . '/../../includes/header.php';
                     <td><?php echo $mentor['location'] ? htmlspecialchars($mentor['location']) : '<span style="color: #999;">N/A</span>'; ?></td>
                     <td><?php echo $mentor['current_mentees']; ?> / <?php echo $mentor['max_mentees']; ?></td>
                     <td>
-                        <button onclick="openSendRequestModal(<?php echo $mentor['user_id']; ?>, '<?php echo htmlspecialchars(addslashes($mentor['first_name'] . ' ' . $mentor['last_name'])); ?>')" class="btn">Send Request</button>
+                        <?php if (in_array($mentor['user_id'], $pendingMentorIds)): ?>
+                            <span class="badge badge-warning">Pending Approval</span>
+                        <?php else: ?>
+                            <button onclick="openSendRequestModal(<?php echo $mentor['user_id']; ?>, '<?php echo htmlspecialchars(addslashes($mentor['first_name'] . ' ' . $mentor['last_name'])); ?>')" class="btn">Send Request</button>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>

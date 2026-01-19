@@ -54,19 +54,38 @@ if (!$menteeProfile) {
 $message = '';
 $messageType = '';
 
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_request'])) {
+// Handle form submission (both GET and POST from modal)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $requestMessage = trim($_POST['message'] ?? '');
+    $postMentorId = isset($_POST['mentor_id']) ? intval($_POST['mentor_id']) : $mentorId;
+    
+    // Validate mentor ID
+    if (!$postMentorId) {
+        header('Location: /pages/mentee/browse_mentors.php?error=invalid_mentor');
+        exit();
+    }
+    
+    // Re-validate mentor
+    $mentorProfile = $mentorClass->getProfile($postMentorId);
+    if (!$mentorProfile || !$mentorProfile['is_verified'] || !$mentorClass->hasCapacity($postMentorId)) {
+        header('Location: /pages/mentee/browse_mentors.php?error=invalid_mentor');
+        exit();
+    }
     
     $mentorshipClass = new Mentorship();
-    $result = $mentorshipClass->createRequest($userId, $mentorId, $requestMessage);
+    $result = $mentorshipClass->createRequest($userId, $postMentorId, $requestMessage);
     
     if ($result['success']) {
-        header('Location: /pages/mentee/my_requests.php?success=request_sent');
+        header('Location: /pages/mentee/browse_mentors.php?success=request_sent');
         exit();
     } else {
-        $message = $result['message'];
-        $messageType = 'error';
+        // Redirect with error
+        if (strpos($result['message'], 'already pending') !== false) {
+            header('Location: /pages/mentee/browse_mentors.php?error=request_pending');
+        } else {
+            header('Location: /pages/mentee/browse_mentors.php?error=mentor_no_capacity');
+        }
+        exit();
     }
 }
 
