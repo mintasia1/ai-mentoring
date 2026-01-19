@@ -1,5 +1,6 @@
 <?php
 require_once('database.php');
+require_once('secrets.php');
 
 // Application settings
 define('APP_NAME', 'CUHK Law E-Mentoring Platform');
@@ -9,12 +10,6 @@ define('SESSION_LIFETIME', 3600); // 1 hour in seconds
 // Security settings
 define('PASSWORD_MIN_LENGTH', 8);
 define('SESSION_NAME', 'cuhk_ementoring_session');
-
-// CSRF Protection
-// IMPORTANT: Change these secret keys to random, unique values for your installation
-// Generate new keys using: bin2hex(random_bytes(32))
-define('CSRF_SECRET_KEY', 'a7f5c8d9e2b1a4c6f8e3d5a7b9c2e4f6a8b0c3d5e7f9a1b3c5d7e9f1a3b5c7d9e1');
-// Alternative method to generate key: openssl_rand -hex 32
 
 // Rate Limiting Settings
 define('RATE_LIMIT_LOGIN', 5);          // Max login attempts
