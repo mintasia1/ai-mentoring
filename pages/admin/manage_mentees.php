@@ -40,9 +40,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
             $userId = intval($userId);
             $user = $userClass->getUserById($userId);
             
-            if (!$user || $user['role'] !== 'mentee') {
+            if (!$user) {
                 $failCount++;
-                Logger::warning("Batch action attempted on non-mentee user", ['user_id' => $userId, 'action' => $action]);
+                Logger::warning("Batch action attempted on non-existent user", ['user_id' => $userId, 'action' => $action]);
+                continue;
+            }
+            
+            // Check if user has a mentee profile by querying the database
+            try {
+                $db = Database::getInstance()->getConnection();
+                $stmt = $db->prepare("SELECT user_id FROM mentee_profiles WHERE user_id = ?");
+                $stmt->execute([$userId]);
+                $hasMenteeProfile = $stmt->fetch();
+                
+                if (!$hasMenteeProfile) {
+                    $failCount++;
+                    Logger::warning("Batch action attempted on user without mentee profile", ['user_id' => $userId, 'action' => $action, 'role' => $user['role']]);
+                    continue;
+                }
+            } catch (Exception $e) {
+                $failCount++;
+                Logger::error("Failed to check mentee profile existence", ['user_id' => $userId, 'error' => $e->getMessage()]);
                 continue;
             }
             
