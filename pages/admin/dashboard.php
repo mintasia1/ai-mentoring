@@ -53,9 +53,9 @@ include __DIR__ . '/../../includes/header.php';
     <h3>Recent Users</h3>
     <?php
     $recentUsers = $userClass->getAllUsers(null, 10, 0);
-    if (empty($recentUsers)):
+    if (empty($recentUsers)): ?>
         <p>No users found.</p>
-    <?php else:
+    <?php else: ?>
         <table>
             <thead>
                 <tr>
@@ -67,24 +67,24 @@ include __DIR__ . '/../../includes/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($recentUsers as $user):
+                <?php foreach ($recentUsers as $user): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></td>
                     <td><?php echo htmlspecialchars($user['email']); ?></td>
                     <td><span class="badge badge-info"><?php echo htmlspecialchars($user['role']); ?></span></td>
                     <td>
-                        <?php if ($user['status'] === 'active'):
+                        <?php if ($user['status'] === 'active'): ?>
                             <span class="badge badge-success">Active</span>
-                        <?php else:
+                        <?php else: ?>
                             <span class="badge badge-warning"><?php echo htmlspecialchars($user['status']); ?></span>
-                        <?php endif;
+                        <?php endif; ?>
                     </td>
                     <td><?php echo date('Y-m-d', strtotime($user['created_at'])); ?></td>
                 </tr>
-                <?php endforeach;
+                <?php endforeach; ?>
             </tbody>
         </table>
-    <?php endif;
+    <?php endif; ?>
 </div>
 
 <?php include __DIR__ . "/../../includes/footer.php"; ?>

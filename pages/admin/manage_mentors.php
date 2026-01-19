@@ -134,18 +134,18 @@ include __DIR__ . '/../../includes/header.php';
     <a href="/pages/<?php echo Auth::getCurrentUserRole(); ?>/dashboard.php" class="btn btn-secondary">← Back to Dashboard</a>
 </div>
 
-<?php if ($message):
+<?php if ($message): ?>
     <div class="alert alert-<?php echo $messageType; ?>">
-        <?php echo htmlspecialchars($message);
+        <?php echo htmlspecialchars($message); ?>
     </div>
-<?php endif;
+<?php endif; ?>
 
 <div class="card">
     <h3>Mentors (<?php echo $totalMentors; ?> total)</h3>
     
-    <?php if (empty($mentors)):
+    <?php if (empty($mentors)): ?>
         <p>No mentors found.</p>
-    <?php else:
+    <?php else: ?>
         <form method="POST" id="batchForm">
             <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
                 <select name="batch_action" id="batchAction" class="form-control" style="width: auto;">
@@ -183,58 +183,58 @@ include __DIR__ . '/../../includes/header.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($mentors as $mentor):
+                    <?php foreach ($mentors as $mentor): ?>
                     <tr>
                         <td>
                             <input type="checkbox" name="selected_users[]" value="<?php echo $mentor['user_id']; ?>" class="user-checkbox">
                         </td>
                         <td>
                             <a href="/pages/mentor/dashboard.php?view_user=<?php echo $mentor['user_id']; ?>">
-                                <?php echo htmlspecialchars($mentor['email']);
+                                <?php echo htmlspecialchars($mentor['email']); ?>
                             </a>
                         </td>
                         <td><?php echo htmlspecialchars($mentor['first_name'] . ' ' . $mentor['last_name']); ?></td>
                         <td>
-                            <?php if ($mentor['is_verified']):
+                            <?php if ($mentor['is_verified']): ?>
                                 <span class="badge" style="background: #27ae60; color: white;">Verified</span>
-                            <?php else:
+                            <?php else: ?>
                                 <span class="badge" style="background: #f39c12; color: white;">Pending</span>
-                            <?php endif;
+                            <?php endif; ?>
                         </td>
                         <td><span class="badge badge-info"><?php echo htmlspecialchars($mentor['role']); ?></span></td>
                         <td>
-                            <?php if ($mentor['status'] === 'active'):
+                            <?php if ($mentor['status'] === 'active'): ?>
                                 <span class="badge badge-success">Active</span>
-                            <?php elseif ($mentor['status'] === 'disabled'):
+                            <?php elseif ($mentor['status'] === 'disabled'): ?>
                                 <span class="badge" style="background: #ffcccc; color: #c00;">Disabled</span>
-                            <?php else:
+                            <?php else: ?>
                                 <span class="badge badge-warning"><?php echo htmlspecialchars($mentor['status']); ?></span>
-                            <?php endif;
+                            <?php endif; ?>
                         </td>
                         <td>
                             <button type="button" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;" 
                                     onclick="window.location.href='/pages/admin/mentors.php'">View</button>
                         </td>
                     </tr>
-                    <?php endforeach;
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </form>
         
-        <?php if ($totalPages > 1):
+        <?php if ($totalPages > 1): ?>
         <div style="margin-top: 20px; text-align: center;">
-            <?php if ($page > 1):
+            <?php if ($page > 1): ?>
                 <a href="?page=<?php echo $page - 1; ?>" class="btn btn-secondary">« Previous</a>
-            <?php endif;
+            <?php endif; ?>
             
             <span style="margin: 0 15px;">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
             
-            <?php if ($page < $totalPages):
+            <?php if ($page < $totalPages): ?>
                 <a href="?page=<?php echo $page + 1; ?>" class="btn btn-secondary">Next »</a>
-            <?php endif;
+            <?php endif; ?>
         </div>
-        <?php endif;
-    <?php endif;
+        <?php endif; ?>
+    <?php endif; ?>
 </div>
 
 <script>

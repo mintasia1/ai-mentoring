@@ -72,12 +72,11 @@ include __DIR__ . '/../../includes/header.php';
     <a href="/pages/admin/dashboard.php" class="btn btn-secondary">← Back to Dashboard</a>
 </div>
 
-<?php if ($message):
+<?php if ($message): ?>
     <div class="alert alert-<?php echo $messageType; ?>">
-        <?php echo htmlspecialchars($message);
+        <?php echo htmlspecialchars($message); ?>
     </div>
-<?php endif;
-
+<?php endif; ?>
 <div class="card">
     <h3>Statistics</h3>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-top: 20px;">
@@ -107,9 +106,9 @@ include __DIR__ . '/../../includes/header.php';
 
 <div class="card">
     <h3>Mentor Profiles</h3>
-    <?php if (empty($mentors)):
+    <?php if (empty($mentors)): ?>
         <p>No mentors found matching the selected filter.</p>
-    <?php else:
+    <?php else: ?>
         <table>
             <thead>
                 <tr>
@@ -124,7 +123,7 @@ include __DIR__ . '/../../includes/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($mentors as $mentor):
+                <?php foreach ($mentors as $mentor): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($mentor['first_name'] . ' ' . $mentor['last_name']); ?></td>
                     <td><?php echo htmlspecialchars($mentor['email']); ?></td>
@@ -140,33 +139,33 @@ include __DIR__ . '/../../includes/header.php';
                         } else {
                             echo 'N/A';
                         }
-                       
+                        ?>
                     </td>
                     <td>
-                        <?php if ($mentor['is_verified']):
+                        <?php if ($mentor['is_verified']): ?>
                             <span class="badge badge-success">Verified</span>
-                        <?php else:
+                        <?php else: ?>
                             <span class="badge badge-warning">Pending</span>
-                        <?php endif;
+                        <?php endif; ?>
                     </td>
                     <td>
-                        <?php echo $mentor['verification_date'] ? date('Y-m-d H:i', strtotime($mentor['verification_date'])) : 'N/A';
+                        <?php echo $mentor['verification_date'] ? date('Y-m-d H:i', strtotime($mentor['verification_date'])) : 'N/A'; ?>
                     </td>
                     <td>
                         <button onclick="toggleDetails(<?php echo $mentor['user_id']; ?>)" class="btn btn-secondary" style="margin-right: 5px;">View Details</button>
-                        <?php if ($mentor['is_verified']):
+                        <?php if ($mentor['is_verified']): ?>
                             <form method="POST" style="display: inline;">
                                 <input type="hidden" name="action" value="unverify">
                                 <input type="hidden" name="user_id" value="<?php echo $mentor['user_id']; ?>">
                                 <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to revoke verification for this mentor?')">Unverify</button>
                             </form>
-                        <?php else:
+                        <?php else: ?>
                             <form method="POST" style="display: inline;">
                                 <input type="hidden" name="action" value="verify">
                                 <input type="hidden" name="user_id" value="<?php echo $mentor['user_id']; ?>">
                                 <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to verify this mentor?')">Verify</button>
                             </form>
-                        <?php endif;
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <tr id="details-<?php echo $mentor['user_id']; ?>" style="display: none;">
@@ -185,10 +184,10 @@ include __DIR__ . '/../../includes/header.php';
                         <p><strong>Last Updated:</strong> <?php echo date('Y-m-d H:i', strtotime($mentor['updated_at'])); ?></p>
                     </td>
                 </tr>
-                <?php endforeach;
+                <?php endforeach; ?>
             </tbody>
         </table>
-    <?php endif;
+    <?php endif; ?>
 </div>
 
 <script>

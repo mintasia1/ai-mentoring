@@ -64,11 +64,11 @@ include __DIR__ . '/../../includes/header.php';
     <a href="/pages/super_admin/dashboard.php" class="btn btn-secondary">← Back to Dashboard</a>
 </div>
 
-<?php if ($message):
+<?php if ($message): ?>
     <div class="alert alert-<?php echo $messageType; ?>">
-        <?php echo htmlspecialchars($message);
+        <?php echo htmlspecialchars($message); ?>
     </div>
-<?php endif;
+<?php endif; ?>
 
 <div class="card">
     <h3>Create New Administrator</h3>
@@ -111,9 +111,9 @@ include __DIR__ . '/../../includes/header.php';
 
 <div class="card">
     <h3>Super Administrators</h3>
-    <?php if (empty($superAdmins)):
+    <?php if (empty($superAdmins)): ?>
         <p>No super administrators found.</p>
-    <?php else:
+    <?php else: ?>
         <table>
             <thead>
                 <tr>
@@ -125,31 +125,31 @@ include __DIR__ . '/../../includes/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($superAdmins as $admin):
+                <?php foreach ($superAdmins as $admin): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($admin['first_name'] . ' ' . $admin['last_name']); ?></td>
                     <td><?php echo htmlspecialchars($admin['email']); ?></td>
                     <td>
-                        <?php if ($admin['status'] === 'active'):
+                        <?php if ($admin['status'] === 'active'): ?>
                             <span class="badge badge-success">Active</span>
-                        <?php else:
+                        <?php else: ?>
                             <span class="badge badge-warning"><?php echo htmlspecialchars($admin['status']); ?></span>
-                        <?php endif;
+                        <?php endif; ?>
                     </td>
                     <td><?php echo $admin['last_login'] ? date('Y-m-d H:i', strtotime($admin['last_login'])) : 'Never'; ?></td>
                     <td><?php echo date('Y-m-d', strtotime($admin['created_at'])); ?></td>
                 </tr>
-                <?php endforeach;
+                <?php endforeach; ?>
             </tbody>
         </table>
-    <?php endif;
+    <?php endif; ?>
 </div>
 
 <div class="card">
     <h3>Administrators</h3>
-    <?php if (empty($admins)):
+    <?php if (empty($admins)): ?>
         <p>No administrators found.</p>
-    <?php else:
+    <?php else: ?>
         <table>
             <thead>
                 <tr>
@@ -161,25 +161,24 @@ include __DIR__ . '/../../includes/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($admins as $admin):
+                <?php foreach ($admins as $admin): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($admin['first_name'] . ' ' . $admin['last_name']); ?></td>
                     <td><?php echo htmlspecialchars($admin['email']); ?></td>
                     <td>
-                        <?php if ($admin['status'] === 'active'):
+                        <?php if ($admin['status'] === 'active'): ?>
                             <span class="badge badge-success">Active</span>
-                        <?php else:
+                        <?php else: ?>
                             <span class="badge badge-warning"><?php echo htmlspecialchars($admin['status']); ?></span>
-                        <?php endif;
+                        <?php endif; ?>
                     </td>
                     <td><?php echo $admin['last_login'] ? date('Y-m-d H:i', strtotime($admin['last_login'])) : 'Never'; ?></td>
                     <td><?php echo date('Y-m-d', strtotime($admin['created_at'])); ?></td>
                 </tr>
-                <?php endforeach;
+                <?php endforeach; ?>
             </tbody>
         </table>
-    <?php endif;
+    <?php endif; ?>
 </div>
 
-<?php include __DIR__ . "/../../includes/footer.php"; ?>
- 
+<?php include __DIR__ . '/../../includes/footer.php';

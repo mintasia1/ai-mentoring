@@ -71,9 +71,9 @@ include __DIR__ . '/../../includes/header.php';
 
 <div class="card">
     <h3>Recent Activity (Audit Logs)</h3>
-    <?php if (empty($recentLogs)):
+    <?php if (empty($recentLogs)): ?>
         <p>No recent activity.</p>
-    <?php else:
+    <?php else: ?>
         <table>
             <thead>
                 <tr>
@@ -85,7 +85,7 @@ include __DIR__ . '/../../includes/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($recentLogs as $log):
+                <?php foreach ($recentLogs as $log): ?>
                 <tr>
                     <td><?php echo date('Y-m-d H:i:s', strtotime($log['created_at'])); ?></td>
                     <td>
@@ -95,17 +95,17 @@ include __DIR__ . '/../../includes/header.php';
                         } else {
                             echo 'System';
                         }
-                       
+                        ?>
                     </td>
                     <td><?php echo htmlspecialchars($log['action']); ?></td>
                     <td><?php echo htmlspecialchars(substr($log['details'] ?? '', 0, 50)); ?></td>
                     <td><?php echo htmlspecialchars($log['ip_address'] ?? 'N/A'); ?></td>
                 </tr>
-                <?php endforeach;
+                <?php endforeach; ?>
             </tbody>
         </table>
         <a href="/pages/super_admin/audit_logs.php" class="btn btn-secondary" style="margin-top: 10px;">View All Logs</a>
-    <?php endif;
+    <?php endif; ?>
 </div>
 
 <div class="card">

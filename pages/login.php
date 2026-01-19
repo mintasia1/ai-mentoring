@@ -43,13 +43,13 @@ include __DIR__ . '/../includes/header.php';
 <div class="card" style="max-width: 500px; margin: 50px auto;">
     <h2>Login</h2>
     
-    <?php if ($error):
+    <?php if ($error): ?>
         <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
-    <?php endif;
+    <?php endif; ?>
     
-    <?php if ($success):
+    <?php if ($success): ?>
         <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
-    <?php endif;
+    <?php endif; ?>
     
     <form method="POST" action="">
         <div class="form-group">

@@ -48,14 +48,12 @@ include __DIR__ . '/../../includes/header.php';
 
 <h2>My Profile</h2>
 
-<?php if ($error):
+<?php if ($error): ?>
     <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
-<?php endif;
-
-<?php if ($success):
+<?php endif; ?>
+<?php if ($success): ?>
     <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
-<?php endif;
-
+<?php endif; ?>
 <div class="card">
     <form method="POST" action="">
         <div class="form-group">
@@ -67,11 +65,11 @@ include __DIR__ . '/../../includes/header.php';
             <label for="programme_level">Programme Level: *</label>
             <select id="programme_level" name="programme_level" required>
                 <option value="">Select...</option>
-                <?php foreach (PROGRAMME_LEVELS as $key => $label):
+                <?php foreach (PROGRAMME_LEVELS as $key => $label): ?>
                     <option value="<?php echo $key; ?>" <?php echo ($profile['programme_level'] ?? '') === $key ? 'selected' : ''; ?>>
-                        <?php echo $label;
+                        <?php echo $label; ?>
                     </option>
-                <?php endforeach;
+                <?php endforeach; ?>
             </select>
         </div>
         
@@ -84,11 +82,11 @@ include __DIR__ . '/../../includes/header.php';
             <label for="practice_area_preference">Practice Area Preference:</label>
             <select id="practice_area_preference" name="practice_area_preference">
                 <option value="">Select...</option>
-                <?php foreach (PRACTICE_AREAS as $area):
+                <?php foreach (PRACTICE_AREAS as $area): ?>
                     <option value="<?php echo $area; ?>" <?php echo ($profile['practice_area_preference'] ?? '') === $area ? 'selected' : ''; ?>>
-                        <?php echo $area;
+                        <?php echo $area; ?>
                     </option>
-                <?php endforeach;
+                <?php endforeach; ?>
             </select>
         </div>
         

@@ -113,12 +113,11 @@ include __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 
-<?php if (!empty($pesan)):
+<?php if (!empty($pesan)): ?>
     <div class="alert alert-<?php echo $pesan_type; ?>">
-        <?php echo htmlspecialchars($pesan);
+        <?php echo htmlspecialchars($pesan); ?>
     </div>
-<?php endif;
-
+<?php endif; ?>
 <div class="card">
     <form method="POST" id="profileForm">
         <h3>Basic Information</h3>
@@ -157,11 +156,11 @@ include __DIR__ . '/../../includes/header.php';
             <label for="programme_level">Programme Level <span class="required">*</span></label>
             <select id="programme_level" name="programme_level" required>
                 <option value="">Select...</option>
-                <?php foreach (PROGRAMME_LEVELS as $key => $label):
+                <?php foreach (PROGRAMME_LEVELS as $key => $label): ?>
                     <option value="<?php echo $key; ?>" <?php echo ($mentor_data['programme_level'] ?? '') === $key ? 'selected' : ''; ?>>
-                        <?php echo $label;
+                        <?php echo $label; ?>
                     </option>
-                <?php endforeach;
+                <?php endforeach; ?>
             </select>
         </div>
         
@@ -171,11 +170,11 @@ include __DIR__ . '/../../includes/header.php';
             <label for="practice_area">Practice Area <span class="required">*</span></label>
             <select id="practice_area" name="practice_area" required>
                 <option value="">Select...</option>
-                <?php foreach (PRACTICE_AREAS as $area):
+                <?php foreach (PRACTICE_AREAS as $area): ?>
                     <option value="<?php echo $area; ?>" <?php echo ($mentor_data['practice_area'] ?? '') === $area ? 'selected' : ''; ?>>
-                        <?php echo $area;
+                        <?php echo $area; ?>
                     </option>
-                <?php endforeach;
+                <?php endforeach; ?>
             </select>
         </div>
         
