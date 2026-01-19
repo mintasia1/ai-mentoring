@@ -38,14 +38,18 @@ include __DIR__ . '/../../includes/header.php';
             <h2 style="margin: 0; color: white;"><?php echo $totalUsers; ?></h2>
             <p style="margin: 5px 0 0 0;">Total Users</p>
         </div>
-        <div style="background: #27ae60; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-            <h2 style="margin: 0; color: white;"><?php echo $totalMentees; ?></h2>
-            <p style="margin: 5px 0 0 0;">Mentees</p>
-        </div>
-        <div style="background: #f39c12; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-            <h2 style="margin: 0; color: white;"><?php echo $totalMentors; ?></h2>
-            <p style="margin: 5px 0 0 0;">Mentors</p>
-        </div>
+        <a href="/pages/admin/manage_mentees.php" style="text-decoration: none;">
+            <div style="background: #27ae60; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                <h2 style="margin: 0; color: white;"><?php echo $totalMentees; ?></h2>
+                <p style="margin: 5px 0 0 0;">Mentees</p>
+            </div>
+        </a>
+        <a href="/pages/admin/manage_mentors.php" style="text-decoration: none;">
+            <div style="background: #f39c12; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                <h2 style="margin: 0; color: white;"><?php echo $totalMentors; ?></h2>
+                <p style="margin: 5px 0 0 0;">Mentors</p>
+            </div>
+        </a>
         <div style="background: #9b59b6; color: white; padding: 20px; border-radius: 8px; text-align: center;">
             <h2 style="margin: 0; color: white;"><?php echo $totalAdmins; ?></h2>
             <p style="margin: 5px 0 0 0;">Admins</p>
@@ -67,9 +71,9 @@ include __DIR__ . '/../../includes/header.php';
 
 <div class="card">
     <h3>Recent Activity (Audit Logs)</h3>
-    <?php if (empty($recentLogs)): ?>
+    <?php if (empty($recentLogs)):
         <p>No recent activity.</p>
-    <?php else: ?>
+    <?php else:
         <table>
             <thead>
                 <tr>
@@ -81,7 +85,7 @@ include __DIR__ . '/../../includes/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($recentLogs as $log): ?>
+                <?php foreach ($recentLogs as $log):
                 <tr>
                     <td><?php echo date('Y-m-d H:i:s', strtotime($log['created_at'])); ?></td>
                     <td>
@@ -91,17 +95,17 @@ include __DIR__ . '/../../includes/header.php';
                         } else {
                             echo 'System';
                         }
-                        ?>
+                       
                     </td>
                     <td><?php echo htmlspecialchars($log['action']); ?></td>
                     <td><?php echo htmlspecialchars(substr($log['details'] ?? '', 0, 50)); ?></td>
                     <td><?php echo htmlspecialchars($log['ip_address'] ?? 'N/A'); ?></td>
                 </tr>
-                <?php endforeach; ?>
+                <?php endforeach;
             </tbody>
         </table>
         <a href="/pages/super_admin/audit_logs.php" class="btn btn-secondary" style="margin-top: 10px;">View All Logs</a>
-    <?php endif; ?>
+    <?php endif;
 </div>
 
 <div class="card">
@@ -113,4 +117,5 @@ include __DIR__ . '/../../includes/header.php';
     <p><strong>Current Time:</strong> <?php echo date('Y-m-d H:i:s'); ?></p>
 </div>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . "/../../includes/footer.php"; ?>
+ 

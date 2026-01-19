@@ -92,4 +92,3 @@ try {
     echo "3. MySQL server is running\n\n";
     exit(1);
 }
-?>

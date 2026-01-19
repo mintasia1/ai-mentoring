@@ -28,9 +28,9 @@ include __DIR__ . '/../../includes/header.php';
 </div>
 
 <div class="card">
-    <?php if (empty($logs)): ?>
+    <?php if (empty($logs)):
         <p>No audit logs found.</p>
-    <?php else: ?>
+    <?php else:
         <table>
             <thead>
                 <tr>
@@ -44,7 +44,7 @@ include __DIR__ . '/../../includes/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($logs as $log): ?>
+                <?php foreach ($logs as $log):
                 <tr>
                     <td><?php echo date('Y-m-d H:i:s', strtotime($log['created_at'])); ?></td>
                     <td>
@@ -54,7 +54,7 @@ include __DIR__ . '/../../includes/header.php';
                         } else {
                             echo 'System';
                         }
-                        ?>
+                       
                     </td>
                     <td><?php echo htmlspecialchars($log['email'] ?? 'N/A'); ?></td>
                     <td><span class="badge badge-info"><?php echo htmlspecialchars($log['action']); ?></span></td>
@@ -62,18 +62,19 @@ include __DIR__ . '/../../includes/header.php';
                     <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;"><?php echo htmlspecialchars($log['details'] ?? ''); ?></td>
                     <td><?php echo htmlspecialchars($log['ip_address'] ?? 'N/A'); ?></td>
                 </tr>
-                <?php endforeach; ?>
+                <?php endforeach;
             </tbody>
         </table>
         
         <div style="margin-top: 20px;">
-            <?php if ($page > 1): ?>
+            <?php if ($page > 1):
                 <a href="?page=<?php echo $page - 1; ?>" class="btn btn-secondary">← Previous</a>
-            <?php endif; ?>
+            <?php endif;
             <span style="margin: 0 20px;">Page <?php echo $page; ?></span>
             <a href="?page=<?php echo $page + 1; ?>" class="btn btn-secondary">Next →</a>
         </div>
-    <?php endif; ?>
+    <?php endif;
 </div>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . "/../../includes/footer.php"; ?>
+ 

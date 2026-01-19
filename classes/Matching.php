@@ -183,4 +183,3 @@ class Matching {
         return array_slice($scoredMentors, 0, $limit);
     }
 }
-?>

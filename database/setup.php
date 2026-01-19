@@ -102,4 +102,3 @@ try {
     echo "3. Verify the database user has CREATE DATABASE privileges\n\n";
     exit(1);
 }
-?>

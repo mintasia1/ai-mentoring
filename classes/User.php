@@ -105,5 +105,96 @@ class User {
         $result = $stmt->fetch();
         return $result['count'];
     }
+    
+    /**
+     * Reset user password
+     */
+    public function resetPassword($userId, $newPassword) {
+        $passwordHash = password_hash($newPassword, PASSWORD_BCRYPT);
+        $stmt = $this->db->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        return $stmt->execute([$passwordHash, $userId]);
+    }
+    
+    /**
+     * Disable user account
+     */
+    public function disableUser($userId) {
+        $stmt = $this->db->prepare("UPDATE users SET status = 'disabled' WHERE id = ?");
+        return $stmt->execute([$userId]);
+    }
+    
+    /**
+     * Enable user account
+     */
+    public function enableUser($userId) {
+        $stmt = $this->db->prepare("UPDATE users SET status = 'active' WHERE id = ?");
+        return $stmt->execute([$userId]);
+    }
+    
+    /**
+     * Delete user and related data
+     */
+    public function deleteUser($userId) {
+        try {
+            $this->db->beginTransaction();
+            
+            // Delete related data first
+            $stmt = $this->db->prepare("DELETE FROM mentor_profiles WHERE user_id = ?");
+            $stmt->execute([$userId]);
+            
+            $stmt = $this->db->prepare("DELETE FROM mentee_profiles WHERE user_id = ?");
+            $stmt->execute([$userId]);
+            
+            $stmt = $this->db->prepare("DELETE FROM mentorships WHERE mentor_id = ? OR mentee_id = ?");
+            $stmt->execute([$userId, $userId]);
+            
+            // Delete user
+            $stmt = $this->db->prepare("DELETE FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return false;
+        }
+    }
+    
+    /**
+     * Change user role
+     */
+    public function changeRole($userId, $newRole) {
+        $allowedRoles = ['mentee', 'mentor', 'admin', 'super_admin'];
+        if (!in_array($newRole, $allowedRoles)) {
+            return false;
+        }
+        
+        $stmt = $this->db->prepare("UPDATE users SET role = ? WHERE id = ?");
+        return $stmt->execute([$newRole, $userId]);
+    }
+    
+    /**
+     * Create a new user (for admin use)
+     */
+    public function createUser($email, $password, $role, $firstName, $lastName) {
+        // Check if email already exists
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        if ($stmt->fetch()) {
+            return false;
+        }
+        
+        $passwordHash = password_hash($password, PASSWORD_BCRYPT);
+        
+        try {
+            $stmt = $this->db->prepare(
+                "INSERT INTO users (email, password_hash, role, first_name, last_name) 
+                 VALUES (?, ?, ?, ?, ?)"
+            );
+            $stmt->execute([$email, $passwordHash, $role, $firstName, $lastName]);
+            return $this->db->lastInsertId();
+        } catch(PDOException $e) {
+            return false;
+        }
+    }
 }
-?>

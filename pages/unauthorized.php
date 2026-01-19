@@ -17,4 +17,5 @@ include __DIR__ . '/../includes/header.php';
     <a href="/index.php" class="btn">Go to Home</a>
 </div>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+<?php include __DIR__ . "/../../includes/footer.php"; ?>
+ 

@@ -56,30 +56,30 @@ $currentRole = Auth::getCurrentUserRole();
         <div class="container">
             <h1><a href="/index.php"><?php echo APP_NAME; ?></a></h1>
             <nav>
-                <?php if ($isLoggedIn): ?>
-                    <?php if ($currentRole === 'mentee'): ?>
+                <?php if ($isLoggedIn):
+                    <?php if ($currentRole === 'mentee'):
                         <a href="/pages/mentee/dashboard.php">Dashboard</a>
                         <a href="/pages/mentee/browse_mentors.php">Browse Mentors</a>
                         <a href="/pages/mentee/my_requests.php">My Requests</a>
-                    <?php elseif ($currentRole === 'mentor'): ?>
+                    <?php elseif ($currentRole === 'mentor'):
                         <a href="/pages/mentor/dashboard.php">Dashboard</a>
                         <a href="/pages/mentor/requests.php">Requests</a>
                         <a href="/pages/mentor/my_mentees.php">My Mentees</a>
-                    <?php elseif ($currentRole === 'admin'): ?>
+                    <?php elseif ($currentRole === 'admin'):
                         <a href="/pages/admin/dashboard.php">Dashboard</a>
                         <a href="/pages/admin/users.php">Users</a>
                         <a href="/pages/admin/matches.php">Matches</a>
-                    <?php elseif ($currentRole === 'super_admin'): ?>
+                    <?php elseif ($currentRole === 'super_admin'):
                         <a href="/pages/super_admin/dashboard.php">Dashboard</a>
                         <a href="/pages/super_admin/admins.php">Admins</a>
                         <a href="/pages/super_admin/audit_logs.php">Audit Logs</a>
-                    <?php endif; ?>
+                    <?php endif;
                     <a href="/pages/logout.php">Logout</a>
-                <?php else: ?>
+                <?php else:
                     <a href="/index.php">Home</a>
                     <a href="/pages/login.php">Login</a>
                     <a href="/pages/register.php">Register</a>
-                <?php endif; ?>
+                <?php endif;
             </nav>
         </div>
     </header>

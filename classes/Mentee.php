@@ -102,5 +102,20 @@ class Mentee {
         $count = $this->getRematchCount($userId);
         return $count < REMATCH_LIMIT;
     }
+    
+    /**
+     * Get mentees with user info (for admin management)
+     */
+    public function getMenteesWithUserInfo($limit = 30, $offset = 0) {
+        $stmt = $this->db->prepare(
+            "SELECT u.id as user_id, u.email, u.first_name, u.last_name, u.status, u.role,
+                    mp.created_at, mp.updated_at
+             FROM users u 
+             INNER JOIN mentee_profiles mp ON u.id = mp.user_id 
+             ORDER BY mp.created_at DESC
+             LIMIT ? OFFSET ?"
+        );
+        $stmt->execute([$limit, $offset]);
+        return $stmt->fetchAll();
+    }
 }
-?>

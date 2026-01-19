@@ -56,4 +56,3 @@ class AuditLog {
         return $stmt->fetchAll();
     }
 }
-?>

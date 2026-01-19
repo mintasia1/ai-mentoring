@@ -77,4 +77,3 @@ class Workspace {
         return $stmt->execute([$itemId]);
     }
 }
-?>

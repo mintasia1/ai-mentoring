@@ -189,5 +189,20 @@ class Mentor {
         );
         return $stmt->fetch();
     }
+    
+    /**
+     * Get mentors with user info (for admin management)
+     */
+    public function getMentorsWithUserInfo($limit = 30, $offset = 0) {
+        $stmt = $this->db->prepare(
+            "SELECT u.id as user_id, u.email, u.first_name, u.last_name, u.status, u.role,
+                    mp.is_verified, mp.verification_date, mp.created_at, mp.updated_at
+             FROM users u 
+             INNER JOIN mentor_profiles mp ON u.id = mp.user_id 
+             ORDER BY mp.created_at DESC
+             LIMIT ? OFFSET ?"
+        );
+        $stmt->execute([$limit, $offset]);
+        return $stmt->fetchAll();
+    }
 }
-?>

@@ -27,14 +27,18 @@ include __DIR__ . '/../../includes/header.php';
 <div class="card">
     <h3>System Overview</h3>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
-        <div style="background: #27ae60; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-            <h2 style="margin: 0; color: white;"><?php echo $totalMentees; ?></h2>
-            <p style="margin: 5px 0 0 0;">Mentees</p>
-        </div>
-        <div style="background: #f39c12; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-            <h2 style="margin: 0; color: white;"><?php echo $totalMentors; ?></h2>
-            <p style="margin: 5px 0 0 0;">Mentors</p>
-        </div>
+        <a href="/pages/admin/manage_mentees.php" style="text-decoration: none;">
+            <div style="background: #27ae60; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                <h2 style="margin: 0; color: white;"><?php echo $totalMentees; ?></h2>
+                <p style="margin: 5px 0 0 0;">Mentees</p>
+            </div>
+        </a>
+        <a href="/pages/admin/manage_mentors.php" style="text-decoration: none;">
+            <div style="background: #f39c12; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                <h2 style="margin: 0; color: white;"><?php echo $totalMentors; ?></h2>
+                <p style="margin: 5px 0 0 0;">Mentors</p>
+            </div>
+        </a>
     </div>
 </div>
 
@@ -49,9 +53,9 @@ include __DIR__ . '/../../includes/header.php';
     <h3>Recent Users</h3>
     <?php
     $recentUsers = $userClass->getAllUsers(null, 10, 0);
-    if (empty($recentUsers)): ?>
+    if (empty($recentUsers)):
         <p>No users found.</p>
-    <?php else: ?>
+    <?php else:
         <table>
             <thead>
                 <tr>
@@ -63,24 +67,25 @@ include __DIR__ . '/../../includes/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($recentUsers as $user): ?>
+                <?php foreach ($recentUsers as $user):
                 <tr>
                     <td><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></td>
                     <td><?php echo htmlspecialchars($user['email']); ?></td>
                     <td><span class="badge badge-info"><?php echo htmlspecialchars($user['role']); ?></span></td>
                     <td>
-                        <?php if ($user['status'] === 'active'): ?>
+                        <?php if ($user['status'] === 'active'):
                             <span class="badge badge-success">Active</span>
-                        <?php else: ?>
+                        <?php else:
                             <span class="badge badge-warning"><?php echo htmlspecialchars($user['status']); ?></span>
-                        <?php endif; ?>
+                        <?php endif;
                     </td>
                     <td><?php echo date('Y-m-d', strtotime($user['created_at'])); ?></td>
                 </tr>
-                <?php endforeach; ?>
+                <?php endforeach;
             </tbody>
         </table>
-    <?php endif; ?>
+    <?php endif;
 </div>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . "/../../includes/footer.php"; ?>
+ 
