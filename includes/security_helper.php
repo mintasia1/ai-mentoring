@@ -21,12 +21,12 @@ function validateCSRF(): bool {
  */
 function validateFormSecurity(array &$errors = []): bool {
     if (!validateCSRF()) {
-        $errors[] = 'Security token validation failed. Please refresh the page and try again.';
+        $errors[] = 'Invalid request. Please try again.';
         return false;
     }
     
     if (!SpamProtection::checkHoneypot()) {
-        $errors[] = 'Spam detected. Please try again.';
+        $errors[] = 'Invalid request. Please try again.';
         return false;
     }
     
@@ -43,9 +43,7 @@ function validateFormSecurity(array &$errors = []): bool {
  */
 function checkRateLimit(string $action, int $maxAttempts, int $timeWindow, array &$errors = []): bool {
     if (!SpamProtection::checkRateLimit($action, $maxAttempts, $timeWindow)) {
-        $timeLeft = SpamProtection::getRateLimitTimeLeft($action, $timeWindow);
-        $minutesLeft = ceil($timeLeft / 60);
-        $errors[] = "Too many attempts. Please try again in $minutesLeft minute" . ($minutesLeft > 1 ? 's' : '') . ".";
+        $errors[] = 'Invalid request. Please try again.';
         return false;
     }
     return true;
