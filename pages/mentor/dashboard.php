@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../classes/User.php';
 require_once __DIR__ . '/../../classes/Mentor.php';
 require_once __DIR__ . '/../../classes/Mentorship.php';
 
-Auth::requireRole(['mentor', 'admin', 'super_admin']);
+Auth::requirePageAccess('mentor_pages');
 
 $pageTitle = 'Mentor Dashboard';
 $userId = Auth::getCurrentUserId();

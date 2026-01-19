@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/AuditLog.php';
 
-Auth::requireRole('super_admin');
+Auth::requirePageAccess('super_admin_pages');
 
 $pageTitle = 'Audit Logs';
 

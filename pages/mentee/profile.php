@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
 
-Auth::requireRole(['mentee', 'mentor', 'admin', 'super_admin']);
+Auth::requirePageAccess('mentee_pages');
 
 $pageTitle = 'My Profile';
 $userId = Auth::getCurrentUserId();

@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/User.php';
 require_once __DIR__ . '/../../classes/AuditLog.php';
 
-Auth::requireRole('super_admin');
+Auth::requirePageAccess('super_admin_pages');
 
 $pageTitle = 'Manage All Users';
 $userClass = new User();

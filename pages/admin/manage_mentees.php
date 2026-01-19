@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../classes/User.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
 require_once __DIR__ . '/../../classes/AuditLog.php';
 
-Auth::requireRole(['admin', 'super_admin']);
+Auth::requirePageAccess('admin_pages');
 
 $pageTitle = 'Manage Mentees';
 $currentUserId = Auth::getCurrentUserId();

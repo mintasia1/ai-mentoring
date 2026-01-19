@@ -40,3 +40,13 @@ define('PROGRAMME_LEVELS', [
     'PhD' => 'Doctor of Philosophy',
     'Other' => 'Other'
 ]);
+
+// Role-based Access Control (RBAC)
+// Define which roles can access which page types
+// Hierarchy: Super Admin → Admin → Mentor → Mentee
+define('ROLE_PERMISSIONS', [
+    'mentee_pages' => ['mentee', 'mentor', 'admin', 'super_admin'],
+    'mentor_pages' => ['mentor', 'admin', 'super_admin'],
+    'admin_pages' => ['admin', 'super_admin'],
+    'super_admin_pages' => ['super_admin']
+]);

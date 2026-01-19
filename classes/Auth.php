@@ -188,4 +188,27 @@ class Auth {
             }
         }
     }
+    
+    /**
+     * Require access to a specific page type based on RBAC configuration
+     * @param string $pageType Page type from ROLE_PERMISSIONS (e.g., 'mentee_pages', 'mentor_pages', 'admin_pages', 'super_admin_pages')
+     */
+    public static function requirePageAccess($pageType) {
+        self::requireLogin();
+        
+        // Get allowed roles from config
+        if (!defined('ROLE_PERMISSIONS') || !isset(ROLE_PERMISSIONS[$pageType])) {
+            // Fallback: if config not found, deny access
+            header('Location: /pages/unauthorized.php');
+            exit();
+        }
+        
+        $allowedRoles = ROLE_PERMISSIONS[$pageType];
+        $currentRole = self::getCurrentUserRole();
+        
+        if (!in_array($currentRole, $allowedRoles)) {
+            header('Location: /pages/unauthorized.php');
+            exit();
+        }
+    }
 }

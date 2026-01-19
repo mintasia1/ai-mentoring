@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/User.php';
 
-Auth::requireRole(['admin', 'super_admin']);
+Auth::requirePageAccess('admin_pages');
 
 $pageTitle = 'Admin Dashboard';
 $userId = Auth::getCurrentUserId();
