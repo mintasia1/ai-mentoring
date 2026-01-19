@@ -76,3 +76,11 @@ define('LOGGING_ENABLED', true); // Default: true (logging enabled)
 // To turn off logging completely:
 //   define('LOGGING_ENABLED', false);
 define('LOG_LEVEL', 'WARNING'); // Default: log errors and warnings
+
+// Initialize log directory if logging is enabled
+if (LOGGING_ENABLED) {
+    $logDir = __DIR__ . '/../log/';
+    if (!is_dir($logDir)) {
+        @mkdir($logDir, 0755, true);
+    }
+}
