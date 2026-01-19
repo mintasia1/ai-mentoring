@@ -321,7 +321,7 @@ include __DIR__ . '/../../includes/header.php';
                     <?php foreach ($mentors as $mentor): ?>
                     <tr>
                         <td>
-                            <input type="checkbox" name="selected_users[]" value="<?php echo $mentor['id']; ?>" class="user-checkbox">
+                            <input type="checkbox" name="selected_users[]" value="<?php echo $mentor['user_id']; ?>" class="user-checkbox">
                         </td>
                         <td><?php echo htmlspecialchars($mentor['first_name'] . ' ' . $mentor['last_name']); ?></td>
                         <td><?php echo htmlspecialchars($mentor['email']); ?></td>
@@ -343,23 +343,23 @@ include __DIR__ . '/../../includes/header.php';
                             <?php endif; ?>
                         </td>
                         <td>
-                            <button type="button" onclick="toggleDetails(<?php echo $mentor['id']; ?>)" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em; margin-right: 5px;">View Details</button>
+                            <button type="button" onclick="toggleDetails(<?php echo $mentor['user_id']; ?>)" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em; margin-right: 5px;">View Details</button>
                             <?php if ($mentor['is_verified']): ?>
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="action" value="unverify">
-                                    <input type="hidden" name="user_id" value="<?php echo $mentor['id']; ?>">
+                                    <input type="hidden" name="user_id" value="<?php echo $mentor['user_id']; ?>">
                                     <button type="submit" class="btn btn-danger" style="padding: 5px 10px; font-size: 0.9em;" onclick="return confirm('Are you sure you want to revoke verification for this mentor?')">Unverify</button>
                                 </form>
                             <?php else: ?>
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="action" value="verify">
-                                    <input type="hidden" name="user_id" value="<?php echo $mentor['id']; ?>">
+                                    <input type="hidden" name="user_id" value="<?php echo $mentor['user_id']; ?>">
                                     <button type="submit" class="btn btn-success" style="padding: 5px 10px; font-size: 0.9em;" onclick="return confirm('Are you sure you want to verify this mentor?')">Verify</button>
                                 </form>
                             <?php endif; ?>
                         </td>
                     </tr>
-                    <tr id="details-<?php echo $mentor['id']; ?>" style="display: none;">
+                    <tr id="details-<?php echo $mentor['user_id']; ?>" style="display: none;">
                         <td colspan="7" style="background: #f8f9fa; padding: 20px;">
                             <h4>Profile Details</h4>
                             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
