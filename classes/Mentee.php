@@ -123,6 +123,7 @@ class Mentee {
      * Get all mentees with full profile info
      */
     public function getAllMentees() {
+        // Only show users who have mentee profiles (exclude users who only have mentor profiles)
         $sql = "SELECT u.id, u.first_name, u.last_name, u.email, u.status, mp.* 
                 FROM users u 
                 INNER JOIN mentee_profiles mp ON u.id = mp.user_id 

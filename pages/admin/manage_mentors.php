@@ -79,21 +79,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
                 continue;
             }
             
-            // Check if user has a mentor profile by querying the database
-            try {
-                $db = Database::getInstance()->getConnection();
-                $stmt = $db->prepare("SELECT user_id FROM mentor_profiles WHERE user_id = ?");
-                $stmt->execute([$userId]);
-                $hasMentorProfile = $stmt->fetch();
-                
-                if (!$hasMentorProfile) {
-                    $failCount++;
-                    Logger::warning("Batch action attempted on user without mentor profile", ['user_id' => $userId, 'action' => $action, 'role' => $user['role']]);
-                    continue;
-                }
-            } catch (Exception $e) {
+            // Verify user has a mentor profile
+            // Since they were displayed on this page (from INNER JOIN with mentor_profiles),
+            // they should have a mentor profile, but we double-check for safety
+            $mentorProfile = $mentorClass->getProfile($userId);
+            if (!$mentorProfile) {
                 $failCount++;
-                Logger::error("Failed to check mentor profile existence", ['user_id' => $userId, 'error' => $e->getMessage()]);
+                Logger::warning("Batch action attempted on user without mentor profile", ['user_id' => $userId, 'action' => $action, 'role' => $user['role']]);
                 continue;
             }
             

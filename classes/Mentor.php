@@ -133,14 +133,16 @@ class Mentor {
      * Get all mentors with profiles (for admin)
      */
     public function getAllMentors($filter = 'all') {
+        // Only show users who have mentor profiles (exclude users who only have mentee profiles)
         $sql = "SELECT u.id, u.first_name, u.last_name, u.email, u.status, mp.* 
                 FROM users u 
-                INNER JOIN mentor_profiles mp ON u.id = mp.user_id";
+                INNER JOIN mentor_profiles mp ON u.id = mp.user_id
+                WHERE 1=1";
         
         if ($filter === 'verified') {
-            $sql .= " WHERE mp.is_verified = 1";
+            $sql .= " AND mp.is_verified = 1";
         } elseif ($filter === 'pending') {
-            $sql .= " WHERE mp.is_verified = 0";
+            $sql .= " AND mp.is_verified = 0";
         }
         
         $sql .= " ORDER BY mp.is_verified ASC, mp.created_at DESC";

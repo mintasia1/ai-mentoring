@@ -46,21 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
                 continue;
             }
             
-            // Check if user has a mentee profile by querying the database
-            try {
-                $db = Database::getInstance()->getConnection();
-                $stmt = $db->prepare("SELECT user_id FROM mentee_profiles WHERE user_id = ?");
-                $stmt->execute([$userId]);
-                $hasMenteeProfile = $stmt->fetch();
-                
-                if (!$hasMenteeProfile) {
-                    $failCount++;
-                    Logger::warning("Batch action attempted on user without mentee profile", ['user_id' => $userId, 'action' => $action, 'role' => $user['role']]);
-                    continue;
-                }
-            } catch (Exception $e) {
+            // Verify user has a mentee profile
+            // Since they were displayed on this page (from INNER JOIN with mentee_profiles),
+            // they should have a mentee profile, but we double-check for safety
+            $menteeProfile = $menteeClass->getProfile($userId);
+            if (!$menteeProfile) {
                 $failCount++;
-                Logger::error("Failed to check mentee profile existence", ['user_id' => $userId, 'error' => $e->getMessage()]);
+                Logger::warning("Batch action attempted on user without mentee profile", ['user_id' => $userId, 'action' => $action, 'role' => $user['role']]);
                 continue;
             }
             
