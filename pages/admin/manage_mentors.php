@@ -59,7 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
     $action = $_POST['batch_action'];
     $selectedUsers = $_POST['selected_users'];
     
-    if (!is_array($selectedUsers) || empty($selectedUsers)) {
+    if (empty($action)) {
+        $message = 'Please select an action';
+        $messageType = 'error';
+    } elseif (!is_array($selectedUsers) || empty($selectedUsers)) {
         $message = 'No users selected';
         $messageType = 'error';
     } else {
@@ -72,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
             
             if (!$user || $user['role'] !== 'mentor') {
                 $failCount++;
+                Logger::warning("Batch action attempted on non-mentor user", ['user_id' => $userId, 'action' => $action]);
                 continue;
             }
             
