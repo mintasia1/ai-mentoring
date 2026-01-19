@@ -175,75 +175,10 @@ include __DIR__ . '/../../includes/header.php';
             <p style="font-size: 0.9rem; color: #666;">Maximum 500 characters</p>
         </div>
         
-        <button type="submit" class="btn">Save Profile</button>
-        <a href="/pages/mentee/dashboard.php" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn" style="display: inline-block; padding: 10px 20px; font-size: 1rem; text-decoration: none;">Save Profile</button>
+        <a href="/pages/mentee/dashboard.php" class="btn btn-secondary" style="display: inline-block; padding: 10px 20px; font-size: 1rem; text-decoration: none;">Cancel</a>
     </form>
 </div>
-
-<script>
-    // Handle "Other" option selection
-    document.getElementById('programme_level').addEventListener('change', function() {
-        const otherDiv = document.getElementById('programme_level_other_div');
-        const otherInput = document.getElementById('programme_level_other');
-        
-        if (this.value === 'Other') {
-            otherDiv.style.display = 'block';
-            otherInput.required = true;
-        } else {
-            otherDiv.style.display = 'none';
-            otherInput.required = false;
-            otherInput.value = '';
-        }
-    });
-    
-    document.getElementById('practice_area_preference').addEventListener('change', function() {
-        const otherDiv = document.getElementById('practice_area_other_div');
-        const otherInput = document.getElementById('practice_area_other');
-        
-        if (this.value === 'Other') {
-            otherDiv.style.display = 'block';
-            otherInput.required = true;
-        } else {
-            otherDiv.style.display = 'none';
-            otherInput.required = false;
-            otherInput.value = '';
-        }
-    });
-    
-    // Validate "Other" inputs - no double quotes
-    function validateOtherInput(input) {
-        if (input.value.includes('"')) {
-            alert('Double quotes (") are not allowed in this field');
-            input.value = input.value.replace(/"/g, '');
-            return false;
-        }
-        return true;
-    }
-    
-    document.getElementById('programme_level_other').addEventListener('input', function() {
-        validateOtherInput(this);
-    });
-    
-    document.getElementById('practice_area_other').addEventListener('input', function() {
-        validateOtherInput(this);
-    });
-    
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        const programmeLevel = document.getElementById('programme_level').value;
-        const practiceArea = document.getElementById('practice_area_preference').value;
-        
-        if (programmeLevel === 'Other') {
-            document.getElementById('programme_level_other_div').style.display = 'block';
-            document.getElementById('programme_level_other').required = true;
-        }
-        
-        if (practiceArea === 'Other') {
-            document.getElementById('practice_area_other_div').style.display = 'block';
-            document.getElementById('practice_area_other').required = true;
-        }
-    });
-</script>
 
 <?php include __DIR__ . "/../../includes/footer.php"; ?>
  

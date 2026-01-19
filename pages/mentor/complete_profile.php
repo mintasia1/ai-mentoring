@@ -328,8 +328,8 @@ include __DIR__ . '/../../includes/header.php';
         </div>
         
         <div style="margin-top: 30px;">
-            <a href="/pages/mentor/dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
-            <button type="submit" name="update_profile" class="btn btn-success">💾 Save Profile</button>
+            <a href="/pages/mentor/dashboard.php" class="btn btn-secondary" style="display: inline-block; padding: 10px 20px; font-size: 1rem; text-decoration: none;">Back to Dashboard</a>
+            <button type="submit" name="update_profile" class="btn btn-success" style="display: inline-block; padding: 10px 20px; font-size: 1rem;">💾 Save Profile</button>
         </div>
     </form>
 </div>

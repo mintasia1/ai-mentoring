@@ -43,17 +43,48 @@ class Matching {
         
         // Practice area match (mandatory)
         $practiceAreaMatch = false;
-        if ($mentee['practice_area_preference'] && 
-            $mentee['practice_area_preference'] === $mentor['practice_area']) {
-            $score += $weights['practice_area'];
-            $practiceAreaMatch = true;
+        if ($mentee['practice_area_preference'] && $mentor['practice_area']) {
+            // Exact match
+            if ($mentee['practice_area_preference'] === $mentor['practice_area']) {
+                $score += $weights['practice_area'];
+                $practiceAreaMatch = true;
+            } 
+            // Both selected "Other" - compare custom values using text similarity
+            elseif (!in_array($mentee['practice_area_preference'], array_keys(PRACTICE_AREAS)) &&
+                    !in_array($mentor['practice_area'], array_keys(PRACTICE_AREAS))) {
+                $similarity = $this->calculateTextSimilarity(
+                    $mentee['practice_area_preference'],
+                    $mentor['practice_area']
+                );
+                // If similarity is high enough (>= 70%), consider it a match
+                if ($similarity >= 0.7) {
+                    $score += $weights['practice_area'];
+                    $practiceAreaMatch = true;
+                }
+            }
         }
         
         // Programme level match
         $programmeMatch = false;
-        if ($mentee['programme_level'] === $mentor['programme_level']) {
-            $score += $weights['programme'];
-            $programmeMatch = true;
+        if ($mentee['programme_level'] && $mentor['programme_level']) {
+            // Exact match
+            if ($mentee['programme_level'] === $mentor['programme_level']) {
+                $score += $weights['programme'];
+                $programmeMatch = true;
+            }
+            // Both selected "Other" - compare custom values using text similarity
+            elseif (!in_array($mentee['programme_level'], array_keys(PROGRAMME_LEVELS)) &&
+                    !in_array($mentor['programme_level'], array_keys(PROGRAMME_LEVELS))) {
+                $similarity = $this->calculateTextSimilarity(
+                    $mentee['programme_level'],
+                    $mentor['programme_level']
+                );
+                // If similarity is high enough (>= 70%), consider it a match
+                if ($similarity >= 0.7) {
+                    $score += $weights['programme'];
+                    $programmeMatch = true;
+                }
+            }
         }
         
         // Interests similarity
