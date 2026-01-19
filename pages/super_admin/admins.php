@@ -200,43 +200,65 @@ include __DIR__ . '/../../includes/header.php';
 </div>
 
 <div class="card">
-    <h3>Create New Administrator</h3>
-    <form method="POST" action="">
-        <input type="hidden" name="action" value="create_admin">
-        
-        <div class="form-group">
-            <label for="email">Email: *</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="password">Password: *</label>
-            <input type="password" id="password" name="password" required minlength="<?php echo PASSWORD_MIN_LENGTH; ?>">
-            <small>Minimum <?php echo PASSWORD_MIN_LENGTH; ?> characters</small>
-        </div>
-        
-        <div class="form-group">
-            <label for="first_name">First Name: *</label>
-            <input type="text" id="first_name" name="first_name" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="last_name">Last Name: *</label>
-            <input type="text" id="last_name" name="last_name" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="role">Role: *</label>
-            <select id="role" name="role" required>
-                <option value="">Select Role</option>
-                <option value="admin">Admin</option>
-                <option value="super_admin">Super Admin</option>
-            </select>
-        </div>
-        
-        <button type="submit" class="btn">Create Administrator</button>
-    </form>
+    <h3 onclick="toggleCreateForm()" style="cursor: pointer; user-select: none;">
+        <span id="createFormToggle">▼</span> Create New Administrator
+    </h3>
+    <div id="createAdminForm" style="display: none; margin-top: 15px;">
+        <form method="POST" action="" autocomplete="off">
+            <input type="hidden" name="action" value="create_admin">
+            
+            <div class="form-group">
+                <label for="email">Email: *</label>
+                <input type="email" id="email" name="email" required autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password: *</label>
+                <input type="password" id="password" name="password" required minlength="<?php echo PASSWORD_MIN_LENGTH; ?>" autocomplete="new-password">
+                <small>Minimum <?php echo PASSWORD_MIN_LENGTH; ?> characters</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="first_name">First Name: *</label>
+                <input type="text" id="first_name" name="first_name" required autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="last_name">Last Name: *</label>
+                <input type="text" id="last_name" name="last_name" required autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Role: *</label>
+                <select id="role" name="role" required autocomplete="off">
+                    <option value="">Select Role</option>
+                    <option value="admin">Admin</option>
+                    <option value="super_admin">Super Admin</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn">Create Administrator</button>
+        </form>
+    </div>
 </div>
+
+<script>
+function toggleCreateForm() {
+    const form = document.getElementById('createAdminForm');
+    const toggle = document.getElementById('createFormToggle');
+    if (form.style.display === 'none') {
+        form.style.display = 'block';
+        toggle.textContent = '▼';
+    } else {
+        form.style.display = 'none';
+        toggle.textContent = '►';
+    }
+}
+// Initialize collapsed state
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('createFormToggle').textContent = '►';
+});
+</script>
 
 <div class="card">
     <h3>Administrator List
