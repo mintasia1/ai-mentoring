@@ -73,9 +73,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
             $userId = intval($userId);
             $user = $userClass->getUserById($userId);
             
-            if (!$user || $user['role'] !== 'mentor') {
+            if (!$user) {
                 $failCount++;
-                Logger::warning("Batch action attempted on non-mentor user", ['user_id' => $userId, 'action' => $action]);
+                Logger::warning("Batch action attempted on non-existent user", ['user_id' => $userId, 'action' => $action]);
+                continue;
+            }
+            
+            // Check if user has a mentor profile by querying the database
+            try {
+                $db = Database::getInstance()->getConnection();
+                $stmt = $db->prepare("SELECT user_id FROM mentor_profiles WHERE user_id = ?");
+                $stmt->execute([$userId]);
+                $hasMentorProfile = $stmt->fetch();
+                
+                if (!$hasMentorProfile) {
+                    $failCount++;
+                    Logger::warning("Batch action attempted on user without mentor profile", ['user_id' => $userId, 'action' => $action, 'role' => $user['role']]);
+                    continue;
+                }
+            } catch (Exception $e) {
+                $failCount++;
+                Logger::error("Failed to check mentor profile existence", ['user_id' => $userId, 'error' => $e->getMessage()]);
                 continue;
             }
             
