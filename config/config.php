@@ -1,15 +1,5 @@
 <?php
-/**
- * Database Configuration
- * CUHK Law E-Mentoring Platform
- */
-
-// Database credentials
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'dbhfjgv6xlthd8');
-define('DB_USER', 'uargdrqdobm3h');
-define('DB_PASS', '@}&j7r3J2qn1');
-define('DB_CHARSET', 'utf8mb4');
+require_once('database.php');
 
 // Application settings
 define('APP_NAME', 'CUHK Law E-Mentoring Platform');
@@ -19,6 +9,9 @@ define('SESSION_LIFETIME', 3600); // 1 hour in seconds
 // Security settings
 define('PASSWORD_MIN_LENGTH', 8);
 define('SESSION_NAME', 'cuhk_ementoring_session');
+
+// Timezone
+date_default_timezone_set('Asia/Hong_Kong');
 
 // Mentorship settings
 define('MAX_MENTEES_PER_MENTOR', 3);
@@ -47,6 +40,3 @@ define('PROGRAMME_LEVELS', [
     'PhD' => 'Doctor of Philosophy',
     'Other' => 'Other'
 ]);
-
-// Timezone
-date_default_timezone_set('Asia/Hong_Kong');
