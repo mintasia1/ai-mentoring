@@ -124,7 +124,10 @@ if (!in_array($filter, ['all', 'active', 'disabled'])) {
 
 // Pagination
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$perPage = 30;
+$perPage = isset($_GET['per_page']) ? intval($_GET['per_page']) : 10;
+if (!in_array($perPage, [10, 25, 50, 100])) {
+    $perPage = 10;
+}
 $offset = ($page - 1) * $perPage;
 
 // Get mentees with full profile info
@@ -186,15 +189,40 @@ include __DIR__ . '/../../includes/header.php';
 </div>
 
 <div class="card">
-    <h3>Mentee Profiles
-        <?php if ($filter !== 'all'): ?>
-            - <?php echo ucfirst($filter); ?>
-        <?php endif; ?>
-    </h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0;">Mentee Profiles
+            <?php if ($filter !== 'all'): ?>
+                - <?php echo ucfirst($filter); ?>
+            <?php endif; ?>
+        </h3>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <label for="perPage" style="margin: 0;">Rows:</label>
+            <select id="perPage" onchange="changePerPage(this.value)" style="padding: 5px;">
+                <option value="10" <?php echo $perPage == 10 ? 'selected' : ''; ?>>10</option>
+                <option value="25" <?php echo $perPage == 25 ? 'selected' : ''; ?>>25</option>
+                <option value="50" <?php echo $perPage == 50 ? 'selected' : ''; ?>>50</option>
+                <option value="100" <?php echo $perPage == 100 ? 'selected' : ''; ?>>100</option>
+            </select>
+        </div>
+    </div>
     
     <?php if (empty($mentees)): ?>
         <p>No mentees found.</p>
     <?php else: ?>
+        <?php if ($totalPages > 1): ?>
+        <div style="margin-bottom: 20px; text-align: center;">
+            <?php if ($page > 1): ?>
+                <a href="?filter=<?php echo $filter; ?>&page=<?php echo $page - 1; ?>&per_page=<?php echo $perPage; ?>" class="btn btn-secondary">« Previous</a>
+            <?php endif; ?>
+            
+            <span style="margin: 0 15px;">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
+            
+            <?php if ($page < $totalPages): ?>
+                <a href="?filter=<?php echo $filter; ?>&page=<?php echo $page + 1; ?>&per_page=<?php echo $perPage; ?>" class="btn btn-secondary">Next »</a>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+        
         <form method="POST" id="batchForm">
             <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
                 <select name="batch_action" id="batchAction" class="form-control" style="width: auto;">
@@ -282,13 +310,13 @@ include __DIR__ . '/../../includes/header.php';
         <?php if ($totalPages > 1): ?>
         <div style="margin-top: 20px; text-align: center;">
             <?php if ($page > 1): ?>
-                <a href="?filter=<?php echo $filter; ?>&page=<?php echo $page - 1; ?>" class="btn btn-secondary">« Previous</a>
+                <a href="?filter=<?php echo $filter; ?>&page=<?php echo $page - 1; ?>&per_page=<?php echo $perPage; ?>" class="btn btn-secondary">« Previous</a>
             <?php endif; ?>
             
             <span style="margin: 0 15px;">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
             
             <?php if ($page < $totalPages): ?>
-                <a href="?filter=<?php echo $filter; ?>&page=<?php echo $page + 1; ?>" class="btn btn-secondary">Next »</a>
+                <a href="?filter=<?php echo $filter; ?>&page=<?php echo $page + 1; ?>&per_page=<?php echo $perPage; ?>" class="btn btn-secondary">Next »</a>
             <?php endif; ?>
         </div>
         <?php endif; ?>
@@ -296,6 +324,13 @@ include __DIR__ . '/../../includes/header.php';
 </div>
 
 <script>
+function changePerPage(perPage) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', '1');
+    params.set('per_page', perPage);
+    window.location.href = '?' + params.toString();
+}
+
 function toggleSelectAll(checkbox) {
     const checkboxes = document.querySelectorAll('.user-checkbox');
     checkboxes.forEach(cb => cb.checked = checkbox.checked);
