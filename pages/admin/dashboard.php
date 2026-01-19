@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/User.php';
 
-Auth::requireRole('admin');
+Auth::requireRole(['admin', 'super_admin']);
 
 $pageTitle = 'Admin Dashboard';
 $userId = Auth::getCurrentUserId();
@@ -40,13 +40,6 @@ include __DIR__ . '/../../includes/header.php';
             </div>
         </a>
     </div>
-</div>
-
-<div class="card">
-    <h3>Quick Actions</h3>
-    <a href="/pages/admin/users.php" class="btn">Manage Users</a>
-    <a href="/pages/admin/mentors.php" class="btn btn-secondary">Verify Mentors</a>
-    <a href="/pages/admin/matches.php" class="btn btn-secondary">View Matches</a>
 </div>
 
 <div class="card">

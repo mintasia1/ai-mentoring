@@ -34,10 +34,12 @@ include __DIR__ . '/../../includes/header.php';
 <div class="card">
     <h3>System Overview</h3>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
-        <div style="background: #3498db; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-            <h2 style="margin: 0; color: white;"><?php echo $totalUsers; ?></h2>
-            <p style="margin: 5px 0 0 0;">Total Users</p>
-        </div>
+        <a href="/pages/super_admin/manage_users.php" style="text-decoration: none;">
+            <div style="background: #3498db; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                <h2 style="margin: 0; color: white;"><?php echo $totalUsers; ?></h2>
+                <p style="margin: 5px 0 0 0;">Total Users</p>
+            </div>
+        </a>
         <a href="/pages/admin/manage_mentees.php" style="text-decoration: none;">
             <div style="background: #27ae60; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
                 <h2 style="margin: 0; color: white;"><?php echo $totalMentees; ?></h2>
@@ -50,23 +52,19 @@ include __DIR__ . '/../../includes/header.php';
                 <p style="margin: 5px 0 0 0;">Mentors</p>
             </div>
         </a>
-        <div style="background: #9b59b6; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-            <h2 style="margin: 0; color: white;"><?php echo $totalAdmins; ?></h2>
-            <p style="margin: 5px 0 0 0;">Admins</p>
-        </div>
-        <div style="background: #e74c3c; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-            <h2 style="margin: 0; color: white;"><?php echo $totalSuperAdmins; ?></h2>
-            <p style="margin: 5px 0 0 0;">Super Admins</p>
-        </div>
+        <a href="/pages/super_admin/admins.php?filter=admin" style="text-decoration: none;">
+            <div style="background: #9b59b6; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                <h2 style="margin: 0; color: white;"><?php echo $totalAdmins; ?></h2>
+                <p style="margin: 5px 0 0 0;">Admins</p>
+            </div>
+        </a>
+        <a href="/pages/super_admin/admins.php?filter=super_admin" style="text-decoration: none;">
+            <div style="background: #e74c3c; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                <h2 style="margin: 0; color: white;"><?php echo $totalSuperAdmins; ?></h2>
+                <p style="margin: 5px 0 0 0;">Super Admins</p>
+            </div>
+        </a>
     </div>
-</div>
-
-<div class="card">
-    <h3>Quick Actions</h3>
-    <a href="/pages/super_admin/users.php" class="btn">Manage All Users</a>
-    <a href="/pages/super_admin/admins.php" class="btn btn-secondary">Manage Admins</a>
-    <a href="/pages/super_admin/audit_logs.php" class="btn btn-secondary">View Audit Logs</a>
-    <a href="/pages/super_admin/system_config.php" class="btn btn-secondary">System Configuration</a>
 </div>
 
 <div class="card">

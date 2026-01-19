@@ -96,15 +96,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
     }
 }
 
+// Get filter from query string
+$filter = $_GET['filter'] ?? 'all';
+if (!in_array($filter, ['all', 'active', 'disabled'])) {
+    $filter = 'all';
+}
+
 // Pagination
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $perPage = 30;
 $offset = ($page - 1) * $perPage;
 
-// Get mentees
-$mentees = $menteeClass->getMenteesWithUserInfo($perPage, $offset);
-$totalMentees = $userClass->countUsers('mentee');
+// Get mentees with full profile info
+$allMentees = $menteeClass->getAllMentees();
+
+// Apply filter
+if ($filter === 'active') {
+    $mentees = array_filter($allMentees, function($m) { return $m['status'] === 'active'; });
+} elseif ($filter === 'disabled') {
+    $mentees = array_filter($allMentees, function($m) { return $m['status'] === 'disabled'; });
+} else {
+    $mentees = $allMentees;
+}
+
+$stats = $menteeClass->getStatistics();
+$totalMentees = count($mentees);
 $totalPages = ceil($totalMentees / $perPage);
+
+// Apply pagination to results
+$mentees = array_slice($mentees, $offset, $perPage);
 
 include __DIR__ . '/../../includes/header.php';
 ?>
@@ -122,7 +142,35 @@ include __DIR__ . '/../../includes/header.php';
 <?php endif; ?>
 
 <div class="card">
-    <h3>Mentees (<?php echo $totalMentees; ?> total)</h3>
+    <h3>Statistics</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-top: 20px;">
+        <a href="?filter=all" style="text-decoration: none;">
+            <div style="background: <?php echo $filter === 'all' ? '#229954' : '#27ae60'; ?>; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#229954'" onmouseout="this.style.background='<?php echo $filter === 'all' ? '#229954' : '#27ae60'; ?>'">
+                <h2 style="margin: 0; color: white;"><?php echo $stats['total']; ?></h2>
+                <p style="margin: 5px 0 0 0;">Total Mentees</p>
+            </div>
+        </a>
+        <a href="?filter=active" style="text-decoration: none;">
+            <div style="background: <?php echo $filter === 'active' ? '#2980b9' : '#3498db'; ?>; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#2980b9'" onmouseout="this.style.background='<?php echo $filter === 'active' ? '#2980b9' : '#3498db'; ?>'">
+                <h2 style="margin: 0; color: white;"><?php echo $stats['active']; ?></h2>
+                <p style="margin: 5px 0 0 0;">Active</p>
+            </div>
+        </a>
+        <a href="?filter=disabled" style="text-decoration: none;">
+            <div style="background: <?php echo $filter === 'disabled' ? '#c0392b' : '#e74c3c'; ?>; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='<?php echo $filter === 'disabled' ? '#c0392b' : '#e74c3c'; ?>'">
+                <h2 style="margin: 0; color: white;"><?php echo $stats['disabled']; ?></h2>
+                <p style="margin: 5px 0 0 0;">Disabled</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Mentee Profiles
+        <?php if ($filter !== 'all'): ?>
+            - <?php echo ucfirst($filter); ?>
+        <?php endif; ?>
+    </h3>
     
     <?php if (empty($mentees)): ?>
         <p>No mentees found.</p>
@@ -146,8 +194,9 @@ include __DIR__ . '/../../includes/header.php';
                         <th style="width: 40px;">
                             <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)">
                         </th>
-                        <th>Email</th>
                         <th>Name</th>
+                        <th>Email</th>
+                        <th>Programme Level</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -156,14 +205,11 @@ include __DIR__ . '/../../includes/header.php';
                     <?php foreach ($mentees as $mentee): ?>
                     <tr>
                         <td>
-                            <input type="checkbox" name="selected_users[]" value="<?php echo $mentee['user_id']; ?>" class="user-checkbox">
-                        </td>
-                        <td>
-                            <a href="/pages/mentee/profile.php?view_user=<?php echo $mentee['user_id']; ?>">
-                                <?php echo htmlspecialchars($mentee['email']); ?>
-                            </a>
+                            <input type="checkbox" name="selected_users[]" value="<?php echo $mentee['id']; ?>" class="user-checkbox">
                         </td>
                         <td><?php echo htmlspecialchars($mentee['first_name'] . ' ' . $mentee['last_name']); ?></td>
+                        <td><?php echo htmlspecialchars($mentee['email']); ?></td>
+                        <td><?php echo PROGRAMME_LEVELS[$mentee['programme_level']] ?? $mentee['programme_level']; ?></td>
                         <td>
                             <?php if ($mentee['status'] === 'active'): ?>
                                 <span class="badge badge-success">Active</span>
@@ -174,8 +220,30 @@ include __DIR__ . '/../../includes/header.php';
                             <?php endif; ?>
                         </td>
                         <td>
-                            <button type="button" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;" 
-                                    onclick="window.location.href='/pages/mentee/profile.php?view_user=<?php echo $mentee['user_id']; ?>'">View Profile</button>
+                            <button type="button" onclick="toggleDetails(<?php echo $mentee['id']; ?>)" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">View Details</button>
+                        </td>
+                    </tr>
+                    <tr id="details-<?php echo $mentee['id']; ?>" style="display: none;">
+                        <td colspan="6" style="background: #f8f9fa; padding: 20px;">
+                            <h4>Profile Details</h4>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                <div>
+                                    <p><strong>Student ID:</strong> <?php echo htmlspecialchars($mentee['student_id'] ?? 'N/A'); ?></p>
+                                    <p><strong>Year of Study:</strong> <?php echo htmlspecialchars($mentee['year_of_study'] ?? 'N/A'); ?></p>
+                                    <p><strong>Interests:</strong> <?php echo htmlspecialchars($mentee['interests'] ?? 'N/A'); ?></p>
+                                    <p><strong>Practice Area Preference:</strong> <?php echo htmlspecialchars($mentee['practice_area_preference'] ?? 'N/A'); ?></p>
+                                </div>
+                                <div>
+                                    <p><strong>Language Preference:</strong> <?php echo htmlspecialchars($mentee['language_preference'] ?? 'N/A'); ?></p>
+                                    <p><strong>Location:</strong> <?php echo htmlspecialchars($mentee['location'] ?? 'N/A'); ?></p>
+                                    <p><strong>Rematch Count:</strong> <?php echo $mentee['rematch_count']; ?></p>
+                                    <p><strong>Profile Created:</strong> <?php echo date('Y-m-d H:i', strtotime($mentee['created_at'])); ?></p>
+                                </div>
+                            </div>
+                            <p><strong>Goals:</strong></p>
+                            <p style="margin-left: 20px;"><?php echo nl2br(htmlspecialchars($mentee['goals'] ?? 'N/A')); ?></p>
+                            <p><strong>Bio:</strong></p>
+                            <p style="margin-left: 20px;"><?php echo nl2br(htmlspecialchars($mentee['bio'] ?? 'N/A')); ?></p>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -186,13 +254,13 @@ include __DIR__ . '/../../includes/header.php';
         <?php if ($totalPages > 1): ?>
         <div style="margin-top: 20px; text-align: center;">
             <?php if ($page > 1): ?>
-                <a href="?page=<?php echo $page - 1; ?>" class="btn btn-secondary">« Previous</a>
+                <a href="?filter=<?php echo $filter; ?>&page=<?php echo $page - 1; ?>" class="btn btn-secondary">« Previous</a>
             <?php endif; ?>
             
             <span style="margin: 0 15px;">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
             
             <?php if ($page < $totalPages): ?>
-                <a href="?page=<?php echo $page + 1; ?>" class="btn btn-secondary">Next »</a>
+                <a href="?filter=<?php echo $filter; ?>&page=<?php echo $page + 1; ?>" class="btn btn-secondary">Next »</a>
             <?php endif; ?>
         </div>
         <?php endif; ?>
@@ -203,6 +271,15 @@ include __DIR__ . '/../../includes/header.php';
 function toggleSelectAll(checkbox) {
     const checkboxes = document.querySelectorAll('.user-checkbox');
     checkboxes.forEach(cb => cb.checked = checkbox.checked);
+}
+
+function toggleDetails(userId) {
+    var detailsRow = document.getElementById('details-' + userId);
+    if (detailsRow.style.display === 'none') {
+        detailsRow.style.display = 'table-row';
+    } else {
+        detailsRow.style.display = 'none';
+    }
 }
 
 function confirmBatchAction() {

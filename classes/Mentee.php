@@ -118,4 +118,33 @@ class Mentee {
         $stmt->execute([$limit, $offset]);
         return $stmt->fetchAll();
     }
+    
+    /**
+     * Get all mentees with full profile info
+     */
+    public function getAllMentees() {
+        $sql = "SELECT u.id, u.first_name, u.last_name, u.email, u.status, mp.* 
+                FROM users u 
+                INNER JOIN mentee_profiles mp ON u.id = mp.user_id 
+                WHERE u.status = 'active'
+                ORDER BY mp.created_at DESC";
+        
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll();
+    }
+    
+    /**
+     * Get mentee statistics
+     */
+    public function getStatistics() {
+        $stmt = $this->db->query(
+            "SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN u.status = 'active' THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN u.status = 'disabled' THEN 1 ELSE 0 END) as disabled
+             FROM mentee_profiles mp
+             INNER JOIN users u ON mp.user_id = u.id"
+        );
+        return $stmt->fetch();
+    }
 }
