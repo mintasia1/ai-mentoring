@@ -54,8 +54,8 @@ include __DIR__ . '/../../includes/header.php';
         <?php if ($profile): ?>
         <a href="/pages/mentee/profile.php" style="text-decoration: none;">
             <div style="background: #3498db; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                <h2 style="margin: 0; color: white;"><?php echo $profile['rematch_count']; ?> / <?php echo REMATCH_LIMIT; ?></h2>
-                <p style="margin: 5px 0 0 0;">Re-match Opportunities</p>
+                <h2 style="margin: 0; color: white;">👤</h2>
+                <p style="margin: 5px 0 0 0;">Profile</p>
             </div>
         </a>
         <?php endif; ?>
