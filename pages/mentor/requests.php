@@ -8,6 +8,8 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/Mentorship.php';
 require_once __DIR__ . '/../../classes/Mentor.php';
+require_once __DIR__ . '/../../classes/Database.php';
+require_once __DIR__ . '/../../classes/Logger.php';
 
 Auth::requirePageAccess('mentor_pages');
 
@@ -16,42 +18,60 @@ $userId = Auth::getCurrentUserId();
 
 $mentorshipClass = new Mentorship();
 $mentorClass = new Mentor();
+$db = Database::getInstance()->getConnection();
+$logger = new Logger();
 
 $message = '';
 $messageType = '';
 
 // Handle request actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $requestId = intval($_POST['request_id'] ?? 0);
-    $action = $_POST['action'] ?? '';
-    $response = trim($_POST['response'] ?? '');
-    
-    // Verify the request belongs to this mentor
-    $stmt = $this->db->prepare("SELECT mentor_id FROM mentorship_requests WHERE id = ?");
-    $stmt->execute([$requestId]);
-    $requestCheck = $stmt->fetch();
-    
-    if (!$requestCheck || $requestCheck['mentor_id'] != $userId) {
-        $message = 'Invalid request or unauthorized access';
+    try {
+        $requestId = intval($_POST['request_id'] ?? 0);
+        $action = $_POST['action'] ?? '';
+        $response = trim($_POST['response'] ?? '');
+        
+        // Verify the request belongs to this mentor
+        $stmt = $db->prepare("SELECT mentor_id FROM mentorship_requests WHERE id = ?");
+        $stmt->execute([$requestId]);
+        $requestCheck = $stmt->fetch();
+        
+        if (!$requestCheck || $requestCheck['mentor_id'] != $userId) {
+            $message = 'Invalid request or unauthorized access';
+            $messageType = 'error';
+            $logger->log('WARNING', 'Unauthorized request action attempt', [
+                'user_id' => $userId,
+                'request_id' => $requestId,
+                'action' => $action
+            ]);
+        } elseif ($action === 'accept') {
+            $result = $mentorshipClass->acceptRequest($requestId, $userId, $response);
+            if ($result['success']) {
+                $message = 'Request accepted successfully!';
+                $messageType = 'success';
+            } else {
+                $message = $result['message'];
+                $messageType = 'error';
+            }
+        } elseif ($action === 'decline') {
+            $result = $mentorshipClass->declineRequest($requestId, $userId, $response);
+            if ($result['success']) {
+                $message = 'Request declined';
+                $messageType = 'success';
+            } else {
+                $message = $result['message'];
+                $messageType = 'error';
+            }
+        }
+    } catch (Exception $e) {
+        $message = 'An error occurred while processing your request';
         $messageType = 'error';
-    } elseif ($action === 'accept') {
-        $result = $mentorshipClass->acceptRequest($requestId, $userId, $response);
-        if ($result['success']) {
-            $message = 'Request accepted successfully!';
-            $messageType = 'success';
-        } else {
-            $message = $result['message'];
-            $messageType = 'error';
-        }
-    } elseif ($action === 'decline') {
-        $result = $mentorshipClass->declineRequest($requestId, $userId, $response);
-        if ($result['success']) {
-            $message = 'Request declined';
-            $messageType = 'success';
-        } else {
-            $message = $result['message'];
-            $messageType = 'error';
-        }
+        $logger->log('ERROR', 'Request action failed', [
+            'user_id' => $userId,
+            'request_id' => $requestId ?? null,
+            'action' => $action ?? null,
+            'error' => $e->getMessage()
+        ]);
     }
 }
 
