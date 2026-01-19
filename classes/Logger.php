@@ -18,9 +18,21 @@ class Logger {
     ];
     
     /**
+     * Check if logging is enabled
+     */
+    private static function isLoggingEnabled(): bool {
+        return defined('LOGGING_ENABLED') ? LOGGING_ENABLED : true;
+    }
+    
+    /**
      * Check if a log level should be logged based on configured LOG_LEVEL
      */
     private static function shouldLog(string $level): bool {
+        // First check if logging is enabled at all
+        if (!self::isLoggingEnabled()) {
+            return false;
+        }
+        
         $configuredLevel = defined('LOG_LEVEL') ? LOG_LEVEL : 'WARNING';
         
         // If configured level is not valid, default to WARNING
