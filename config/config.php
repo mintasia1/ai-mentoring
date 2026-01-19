@@ -56,7 +56,11 @@ define('OTHER_INPUT_PATTERN', '[A-Za-z0-9\s.,;:!?\(\)\-<>]*');
 define('OTHER_INPUT_DESCRIPTION', 'Only alphabets, numbers, and punctuation allowed (no double quotes)');
 
 // Logging settings
-// LOG_LEVEL determines which messages are logged
+// LOGGING_ENABLED controls whether logging is active
+// Set to false to completely disable all logging
+define('LOGGING_ENABLED', true); // Default: true (logging enabled)
+
+// LOG_LEVEL determines which messages are logged (only applies when LOGGING_ENABLED is true)
 // Available levels (in order of severity):
 //   'ERROR'   - Only errors (most restrictive)
 //   'WARNING' - Errors + warnings
@@ -68,4 +72,7 @@ define('OTHER_INPUT_DESCRIPTION', 'Only alphabets, numbers, and punctuation allo
 //   define('LOG_LEVEL', 'WARNING'); // Log errors and warnings
 //   define('LOG_LEVEL', 'INFO');    // Log errors, warnings, and info
 //   define('LOG_LEVEL', 'DEBUG');   // Log everything including debug messages
+//
+// To turn off logging completely:
+//   define('LOGGING_ENABLED', false);
 define('LOG_LEVEL', 'WARNING'); // Default: log errors and warnings
