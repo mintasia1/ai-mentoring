@@ -112,9 +112,9 @@ include __DIR__ . '/../../includes/header.php';
                 name="programme_level_other" 
                 maxlength="200"
                 placeholder="Enter your programme level"
-                pattern="[A-Za-z0-9\s\.,;:!?\-\(\)]*"
-                title="Only alphabets, numbers, and punctuation allowed (no double quotes)">
-            <p style="font-size: 0.9rem; color: #666;">Maximum 200 characters. Alphabets, numbers, and punctuation only (no double quotes)</p>
+                pattern="<?php echo OTHER_INPUT_PATTERN; ?>"
+                title="<?php echo OTHER_INPUT_DESCRIPTION; ?>">
+            <p style="font-size: 0.9rem; color: #666;">Maximum 200 characters. <?php echo OTHER_INPUT_DESCRIPTION; ?></p>
         </div>
         
         <div class="form-group">
@@ -142,9 +142,9 @@ include __DIR__ . '/../../includes/header.php';
                 name="practice_area_other" 
                 maxlength="200"
                 placeholder="Enter your practice area preference"
-                pattern="[A-Za-z0-9\s\.,;:!?\-\(\)]*"
-                title="Only alphabets, numbers, and punctuation allowed (no double quotes)">
-            <p style="font-size: 0.9rem; color: #666;">Maximum 200 characters. Alphabets, numbers, and punctuation only (no double quotes)</p>
+                pattern="<?php echo OTHER_INPUT_PATTERN; ?>"
+                title="<?php echo OTHER_INPUT_DESCRIPTION; ?>">
+            <p style="font-size: 0.9rem; color: #666;">Maximum 200 characters. <?php echo OTHER_INPUT_DESCRIPTION; ?></p>
         </div>
         
         <div class="form-group">

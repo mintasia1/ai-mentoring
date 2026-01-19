@@ -50,3 +50,7 @@ define('ROLE_PERMISSIONS', [
     'admin_pages' => ['admin', 'super_admin'],
     'super_admin_pages' => ['super_admin']
 ]);
+
+// Input validation patterns
+define('OTHER_INPUT_PATTERN', '[A-Za-z0-9\s\.,;:!?\-\(\)]*');
+define('OTHER_INPUT_DESCRIPTION', 'Only alphabets, numbers, and punctuation allowed (no double quotes)');
