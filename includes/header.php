@@ -1,4 +1,9 @@
 <?php
+// Set no-cache headers to prevent caching of sensitive pages
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 if (session_status() === PHP_SESSION_NONE) {
     session_name(SESSION_NAME);
     session_start();
