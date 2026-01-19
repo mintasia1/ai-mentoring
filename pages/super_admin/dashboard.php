@@ -110,7 +110,6 @@ include __DIR__ . '/../../includes/header.php';
     <h3>System Information</h3>
     <p><strong>Application:</strong> <?php echo APP_NAME; ?></p>
     <p><strong>PHP Version:</strong> <?php echo phpversion(); ?></p>
-    <p><strong>Database:</strong> <?php echo DB_NAME; ?></p>
     <p><strong>Timezone:</strong> <?php echo date_default_timezone_get(); ?></p>
     <p><strong>Current Time:</strong> <?php echo date('Y-m-d H:i:s'); ?></p>
 </div>
