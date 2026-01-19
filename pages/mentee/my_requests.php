@@ -32,9 +32,9 @@ $offset = ($page - 1) * $perPage;
 $requests = array_slice($allRequests, $offset, $perPage);
 
 // Count by status
-$pendingCount = count(array_filter($allRequests, fn($r) => $r['status'] === 'pending'));
-$acceptedCount = count(array_filter($allRequests, fn($r) => $r['status'] === 'accepted'));
-$declinedCount = count(array_filter($allRequests, fn($r) => $r['status'] === 'declined'));
+$pendingCount = count(array_filter($allRequests, function($r) { return $r['status'] === 'pending'; }));
+$acceptedCount = count(array_filter($allRequests, function($r) { return $r['status'] === 'accepted'; }));
+$declinedCount = count(array_filter($allRequests, function($r) { return $r['status'] === 'declined'; }));
 
 include __DIR__ . '/../../includes/header.php';
 ?>
