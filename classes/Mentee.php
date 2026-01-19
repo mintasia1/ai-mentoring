@@ -126,7 +126,6 @@ class Mentee {
         $sql = "SELECT u.id, u.first_name, u.last_name, u.email, u.status, mp.* 
                 FROM users u 
                 INNER JOIN mentee_profiles mp ON u.id = mp.user_id 
-                WHERE u.status = 'active'
                 ORDER BY mp.created_at DESC";
         
         $stmt = $this->db->query($sql);
