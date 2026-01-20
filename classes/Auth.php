@@ -96,11 +96,15 @@ class Auth {
             session_name(SESSION_NAME);
             
             // Set secure session cookie parameters
+            // Only set 'secure' flag if HTTPS is available
+            $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') 
+                       || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+            
             session_set_cookie_params([
                 'lifetime' => 0,
                 'path' => '/',
                 'domain' => '',
-                'secure' => true,
+                'secure' => $isHttps,
                 'httponly' => true,
                 'samesite' => 'Strict'
             ]);
