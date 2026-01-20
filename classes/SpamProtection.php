@@ -16,7 +16,7 @@ class SpamProtection {
     public static function checkRateLimit(string $action, int $maxAttempts = 5, int $timeWindow = 300): bool {
         $key = 'rate_limit_' . $action;
         $ip = self::getClientIP();
-        $identifier = $key . '_' . md5($ip);
+        $identifier = $key . '_' . hash('sha256', $ip);
         
         if (!isset($_SESSION[$identifier])) {
             $_SESSION[$identifier] = [
@@ -49,7 +49,7 @@ class SpamProtection {
     public static function recordAttempt(string $action): void {
         $key = 'rate_limit_' . $action;
         $ip = self::getClientIP();
-        $identifier = $key . '_' . md5($ip);
+        $identifier = $key . '_' . hash('sha256', $ip);
         
         if (!isset($_SESSION[$identifier])) {
             $_SESSION[$identifier] = [
@@ -70,7 +70,7 @@ class SpamProtection {
     public static function getRateLimitTimeLeft(string $action, int $timeWindow = 300): int {
         $key = 'rate_limit_' . $action;
         $ip = self::getClientIP();
-        $identifier = $key . '_' . md5($ip);
+        $identifier = $key . '_' . hash('sha256', $ip);
         
         if (!isset($_SESSION[$identifier])) {
             return 0;

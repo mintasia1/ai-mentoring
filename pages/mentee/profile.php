@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
+require_once __DIR__ . '/../../classes/CSRFToken.php';
 
 Auth::requirePageAccess('mentee_pages');
 
@@ -19,8 +20,11 @@ $menteeClass = new Mentee();
 $profile = $menteeClass->getProfile($userId);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $programme_level = $_POST['programme_level'] ?? '';
-    $practice_area_preference = $_POST['practice_area_preference'] ?? '';
+    if (!CSRFToken::validate($_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid request. Please try again.';
+    } else {
+        $programme_level = $_POST['programme_level'] ?? '';
+        $practice_area_preference = $_POST['practice_area_preference'] ?? '';
     
     // Handle "Other" option for programme level
     if ($programme_level === 'Other') {
@@ -72,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+    }
 }
 
 include __DIR__ . '/../../includes/header.php';
@@ -87,6 +92,7 @@ include __DIR__ . '/../../includes/header.php';
 <?php endif; ?>
 <div class="card">
     <form method="POST" action="">
+        <?php echo CSRFToken::getField(); ?>
         <div class="form-group">
             <label for="student_id">Student ID:</label>
             <input type="text" id="student_id" name="student_id" maxlength="200" value="<?php echo htmlspecialchars($profile['student_id'] ?? ''); ?>">

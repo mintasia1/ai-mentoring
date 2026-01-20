@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/Mentorship.php';
 require_once __DIR__ . '/../../classes/Mentor.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
+require_once __DIR__ . '/../../classes/CSRFToken.php';
 
 Auth::requirePageAccess('mentee_pages');
 
@@ -56,6 +57,11 @@ $messageType = '';
 
 // Handle form submission (both GET and POST from modal)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!CSRFToken::validate($_POST['csrf_token'] ?? '')) {
+        header('Location: /pages/mentee/browse_mentors.php?error=invalid_request');
+        exit();
+    }
+    
     $requestMessage = trim($_POST['message'] ?? '');
     $postMentorId = isset($_POST['mentor_id']) ? intval($_POST['mentor_id']) : $mentorId;
     
@@ -126,6 +132,7 @@ include __DIR__ . '/../../includes/header.php';
 <div class="card">
     <h3>Send Your Request</h3>
     <form method="POST">
+        <?php echo CSRFToken::getField(); ?>
         <div class="form-group">
             <label for="message">Message to Mentor (Optional)</label>
             <textarea 

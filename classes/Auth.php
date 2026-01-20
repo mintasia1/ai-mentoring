@@ -94,8 +94,22 @@ class Auth {
     private function startSession($user) {
         if (session_status() === PHP_SESSION_NONE) {
             session_name(SESSION_NAME);
+            
+            // Set secure session cookie parameters
+            session_set_cookie_params([
+                'lifetime' => 0,
+                'path' => '/',
+                'domain' => '',
+                'secure' => true,
+                'httponly' => true,
+                'samesite' => 'Strict'
+            ]);
+            
             session_start();
         }
+        
+        // Regenerate session ID to prevent session fixation
+        session_regenerate_id(true);
         
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['email'] = $user['email'];
@@ -104,6 +118,7 @@ class Auth {
         $_SESSION['last_name'] = $user['last_name'];
         $_SESSION['logged_in'] = true;
         $_SESSION['login_time'] = time();
+        $_SESSION['last_activity'] = time();
     }
     
     /**
@@ -133,7 +148,19 @@ class Auth {
             session_start();
         }
         
-        return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
+        // Check session timeout (30 minutes of inactivity)
+        if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > 1800) {
+            self::logout();
+            return false;
+        }
+        
+        // Update last activity time
+        if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+            $_SESSION['last_activity'] = time();
+            return true;
+        }
+        
+        return false;
     }
     
     /**

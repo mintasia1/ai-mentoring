@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../classes/Mentorship.php';
 require_once __DIR__ . '/../../classes/Mentor.php';
 require_once __DIR__ . '/../../classes/Database.php';
 require_once __DIR__ . '/../../classes/Logger.php';
+require_once __DIR__ . '/../../classes/CSRFToken.php';
 
 Auth::requirePageAccess('mentor_pages');
 
@@ -26,10 +27,14 @@ $messageType = '';
 
 // Handle request actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        $requestId = intval($_POST['request_id'] ?? 0);
-        $action = $_POST['action'] ?? '';
-        $response = trim($_POST['response'] ?? '');
+    if (!CSRFToken::validate($_POST['csrf_token'] ?? '')) {
+        $message = 'Invalid request. Please try again.';
+        $messageType = 'error';
+    } else {
+        try {
+            $requestId = intval($_POST['request_id'] ?? 0);
+            $action = $_POST['action'] ?? '';
+            $response = trim($_POST['response'] ?? '');
         
         // Verify the request belongs to this mentor
         $stmt = $db->prepare("SELECT mentor_id FROM mentorship_requests WHERE id = ?");
@@ -63,15 +68,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $messageType = 'error';
             }
         }
-    } catch (Exception $e) {
-        $message = 'An error occurred while processing your request';
-        $messageType = 'error';
-        $logger->log('ERROR', 'Request action failed', [
-            'user_id' => $userId,
-            'request_id' => $requestId ?? null,
-            'action' => $action ?? null,
-            'error' => $e->getMessage()
-        ]);
+        } catch (Exception $e) {
+            $message = 'An error occurred while processing your request';
+            $messageType = 'error';
+            $logger->log('ERROR', 'Request action failed', [
+                'user_id' => $userId,
+                'request_id' => $requestId ?? null,
+                'action' => $action ?? null,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }
 
@@ -182,7 +188,7 @@ include __DIR__ . '/../../includes/header.php';
                     </td>
                     <td>
                         <?php if ($request['status'] === 'pending'): ?>
-                            <button type="button" onclick='showRequestModal(<?php echo $request['id']; ?>, <?php echo json_encode($request['first_name'] . ' ' . $request['last_name']); ?>, <?php echo json_encode($request['message'] ?? ''); ?>)' class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">Review</button>
+                            <button type="button" onclick='showRequestModal(<?php echo $request['id']; ?>, <?php echo json_encode($request['first_name'] . ' ' . $request['last_name'], JSON_HEX_TAG | JSON_HEX_QUOT); ?>, <?php echo json_encode($request['message'] ?? '', JSON_HEX_TAG | JSON_HEX_QUOT); ?>)' class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">Review</button>
                         <?php else: ?>
                             <button type="button" onclick="toggleDetails(<?php echo $request['id']; ?>)" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">View Details</button>
                         <?php endif; ?>
@@ -245,6 +251,7 @@ include __DIR__ . '/../../includes/header.php';
         </div>
         
         <form method="POST">
+            <?php echo CSRFToken::getField(); ?>
             <input type="hidden" name="request_id" id="modalRequestId">
             <div class="form-group">
                 <label for="response">Response Message (Optional)</label>
