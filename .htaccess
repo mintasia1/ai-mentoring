@@ -20,3 +20,8 @@
         Deny from all
     </IfModule>
 </FilesMatch>
+
+# Deny access to all files beginning with a dot
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
