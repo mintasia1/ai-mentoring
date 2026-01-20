@@ -8,8 +8,10 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../classes/Auth.php';
 require_once __DIR__ . '/../classes/CSRFToken.php';
 require_once __DIR__ . '/../classes/SpamProtection.php';
+require_once __DIR__ . '/../classes/Logger.php';
 
 $pageTitle = 'Register - ' . APP_NAME;
+$bodyClass = 'register';
 $error = '';
 $success = '';
 
@@ -20,18 +22,23 @@ if (Auth::isLoggedIn()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Logger::debug("Registration attempt", ['email' => trim($_POST['email'] ?? ''), 'role' => $_POST['role'] ?? '']);
+    
     // CSRF Protection
     $csrfToken = $_POST['csrf_token'] ?? '';
     if (!CSRFToken::validate($csrfToken)) {
         $error = 'Invalid request. Please try again.';
+        Logger::warning("CSRF validation failed on registration", ['ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown']);
     }
     // Honeypot check
     elseif (!SpamProtection::checkHoneypot()) {
         $error = 'Invalid request. Please try again.';
+        Logger::warning("Honeypot triggered on registration", ['ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown']);
     }
     // Rate limiting check
     elseif (!SpamProtection::checkRateLimit('register', RATE_LIMIT_REGISTER, RATE_LIMIT_WINDOW)) {
         $error = 'Invalid request. Please try again.';
+        Logger::warning("Rate limit exceeded on registration", ['ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown']);
     }
     else {
         $email = trim($_POST['email'] ?? '');
@@ -56,9 +63,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if ($result['success']) {
                 $success = 'Registration successful! Please login.';
+                Logger::info("User registered successfully", ['email' => $email, 'role' => $role, 'user_id' => $result['user_id']]);
                 CSRFToken::destroy(); // Destroy token on success
             } else {
                 $error = $result['message'];
+                Logger::warning("Registration failed", ['email' => $email, 'reason' => $result['message']]);
                 SpamProtection::recordAttempt('register');
             }
         }

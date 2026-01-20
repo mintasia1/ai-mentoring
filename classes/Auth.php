@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/AuditLog.php';
+require_once __DIR__ . '/Logger.php';
 
 class Auth {
     private $db;
@@ -18,8 +19,11 @@ class Auth {
      * Register a new user
      */
     public function register($email, $password, $role, $firstName, $lastName) {
+        Logger::debug("Registration attempt", ['email' => $email, 'role' => $role]);
+        
         // Validate password strength
         if (strlen($password) < PASSWORD_MIN_LENGTH) {
+            Logger::warning("Registration failed - weak password", ['email' => $email]);
             return ['success' => false, 'message' => 'Password must be at least ' . PASSWORD_MIN_LENGTH . ' characters'];
         }
         
@@ -27,6 +31,7 @@ class Auth {
         $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$email]);
         if ($stmt->fetch()) {
+            Logger::warning("Registration failed - email already exists", ['email' => $email]);
             return ['success' => false, 'message' => 'Email already registered'];
         }
         
@@ -45,9 +50,11 @@ class Auth {
             
             // Log the registration
             AuditLog::log($userId, 'user_registered', 'users', $userId, "User registered with role: $role");
+            Logger::info("User registered successfully", ['user_id' => $userId, 'email' => $email, 'role' => $role]);
             
             return ['success' => true, 'user_id' => $userId, 'message' => 'Registration successful'];
         } catch(PDOException $e) {
+            Logger::error("Registration database error", ['email' => $email, 'error' => $e->getMessage()]);
             return ['success' => false, 'message' => 'Registration failed: ' . $e->getMessage()];
         }
     }
@@ -56,6 +63,8 @@ class Auth {
      * Login user
      */
     public function login($email, $password) {
+        Logger::debug("Login attempt", ['email' => $email]);
+        
         $stmt = $this->db->prepare(
             "SELECT id, email, password_hash, role, first_name, last_name, status 
              FROM users WHERE email = ?"
@@ -64,14 +73,17 @@ class Auth {
         $user = $stmt->fetch();
         
         if (!$user) {
+            Logger::warning("Login failed - user not found", ['email' => $email]);
             return ['success' => false, 'message' => 'Invalid email or password'];
         }
         
         if ($user['status'] !== 'active') {
+            Logger::warning("Login failed - account not active", ['email' => $email, 'status' => $user['status']]);
             return ['success' => false, 'message' => 'Account is not active'];
         }
         
         if (!password_verify($password, $user['password_hash'])) {
+            Logger::warning("Login failed - invalid password", ['email' => $email]);
             return ['success' => false, 'message' => 'Invalid email or password'];
         }
         
@@ -84,6 +96,7 @@ class Auth {
         
         // Log the login
         AuditLog::log($user['id'], 'user_login', 'users', $user['id'], 'User logged in');
+        Logger::info("User logged in successfully", ['user_id' => $user['id'], 'email' => $email, 'role' => $user['role']]);
         
         return ['success' => true, 'user' => $user, 'message' => 'Login successful'];
     }
@@ -133,8 +146,10 @@ class Auth {
             session_name(SESSION_NAME);
             session_start();
         }
-        if (isset($_SESSION['user_id'])) {
-            AuditLog::log($_SESSION['user_id'], 'user_logout', 'users', $_SESSION['user_id'], 'User logged out');
+        $userId = $_SESSION['user_id'] ?? null;
+        if ($userId) {
+            AuditLog::log($userId, 'user_logout', 'users', $userId, 'User logged out');
+            Logger::info("User logged out", ['user_id' => $userId]);
         }
         
         session_unset();

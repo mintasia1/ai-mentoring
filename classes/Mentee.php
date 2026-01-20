@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Logger.php';
 
 class Mentee {
     private $db;
@@ -17,6 +18,8 @@ class Mentee {
      * Create or update mentee profile
      */
     public function saveProfile($userId, $data) {
+        Logger::debug("Saving mentee profile", ['user_id' => $userId]);
+        
         // Check if profile exists
         $stmt = $this->db->prepare("SELECT id FROM mentee_profiles WHERE user_id = ?");
         $stmt->execute([$userId]);
@@ -31,7 +34,7 @@ class Mentee {
                  language_preference = ?, location = ?, bio = ? 
                  WHERE user_id = ?"
             );
-            return $stmt->execute([
+            $result = $stmt->execute([
                 $data['student_id'] ?? null,
                 $data['programme_level'],
                 $data['year_of_study'] ?? null,
@@ -43,6 +46,10 @@ class Mentee {
                 $data['bio'] ?? null,
                 $userId
             ]);
+            if ($result) {
+                Logger::info("Mentee profile updated", ['user_id' => $userId]);
+            }
+            return $result;
         } else {
             // Insert
             $stmt = $this->db->prepare(
@@ -51,7 +58,7 @@ class Mentee {
                   practice_area_preference, language_preference, location, bio) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
-            return $stmt->execute([
+            $result = $stmt->execute([
                 $userId,
                 $data['student_id'] ?? null,
                 $data['programme_level'],
@@ -63,6 +70,10 @@ class Mentee {
                 $data['location'] ?? null,
                 $data['bio'] ?? null
             ]);
+            if ($result) {
+                Logger::info("Mentee profile created", ['user_id' => $userId]);
+            }
+            return $result;
         }
     }
     

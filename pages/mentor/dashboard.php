@@ -9,11 +9,15 @@ require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/User.php';
 require_once __DIR__ . '/../../classes/Mentor.php';
 require_once __DIR__ . '/../../classes/Mentorship.php';
+require_once __DIR__ . '/../../classes/Logger.php';
 
 Auth::requirePageAccess('mentor_pages');
 
 $pageTitle = 'Mentor Dashboard';
+$bodyClass = 'mentor-dashboard';
 $userId = Auth::getCurrentUserId();
+
+Logger::debug("Mentor dashboard accessed", ['user_id' => $userId]);
 
 $userClass = new User();
 $mentorClass = new Mentor();

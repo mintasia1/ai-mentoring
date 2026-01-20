@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Logger.php';
 
 class Mentor {
     private $db;
@@ -17,6 +18,8 @@ class Mentor {
      * Create or update mentor profile
      */
     public function saveProfile($userId, $data) {
+        Logger::debug("Saving mentor profile", ['user_id' => $userId]);
+        
         // Check if profile exists
         $stmt = $this->db->prepare("SELECT id FROM mentor_profiles WHERE user_id = ?");
         $stmt->execute([$userId]);
@@ -32,7 +35,7 @@ class Mentor {
                  bio = ?, max_mentees = ? 
                  WHERE user_id = ?"
             );
-            return $stmt->execute([
+            $result = $stmt->execute([
                 $data['alumni_id'] ?? null,
                 $data['graduation_year'] ?? null,
                 $data['programme_level'],
@@ -47,6 +50,10 @@ class Mentor {
                 $data['max_mentees'] ?? MAX_MENTEES_PER_MENTOR,
                 $userId
             ]);
+            if ($result) {
+                Logger::info("Mentor profile updated", ['user_id' => $userId]);
+            }
+            return $result;
         } else {
             // Insert
             $stmt = $this->db->prepare(
@@ -56,7 +63,7 @@ class Mentor {
                   bio, max_mentees) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
-            return $stmt->execute([
+            $result = $stmt->execute([
                 $userId,
                 $data['alumni_id'] ?? null,
                 $data['graduation_year'] ?? null,
@@ -71,6 +78,10 @@ class Mentor {
                 $data['bio'] ?? null,
                 $data['max_mentees'] ?? MAX_MENTEES_PER_MENTOR
             ]);
+            if ($result) {
+                Logger::info("Mentor profile created", ['user_id' => $userId]);
+            }
+            return $result;
         }
     }
     
@@ -175,24 +186,34 @@ class Mentor {
      * Verify a mentor
      */
     public function verifyMentor($userId) {
+        Logger::debug("Verifying mentor", ['user_id' => $userId]);
         $stmt = $this->db->prepare(
             "UPDATE mentor_profiles 
              SET is_verified = 1, verification_date = NOW() 
              WHERE user_id = ?"
         );
-        return $stmt->execute([$userId]);
+        $result = $stmt->execute([$userId]);
+        if ($result) {
+            Logger::info("Mentor verified successfully", ['user_id' => $userId]);
+        }
+        return $result;
     }
     
     /**
      * Unverify a mentor
      */
     public function unverifyMentor($userId) {
+        Logger::debug("Unverifying mentor", ['user_id' => $userId]);
         $stmt = $this->db->prepare(
             "UPDATE mentor_profiles 
              SET is_verified = 0, verification_date = NULL 
              WHERE user_id = ?"
         );
-        return $stmt->execute([$userId]);
+        $result = $stmt->execute([$userId]);
+        if ($result) {
+            Logger::info("Mentor unverified", ['user_id' => $userId]);
+        }
+        return $result;
     }
     
     /**

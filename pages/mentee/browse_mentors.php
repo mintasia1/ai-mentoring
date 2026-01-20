@@ -10,11 +10,15 @@ require_once __DIR__ . '/../../classes/Matching.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
 require_once __DIR__ . '/../../classes/Mentorship.php';
 require_once __DIR__ . '/../../classes/CSRFToken.php';
+require_once __DIR__ . '/../../classes/Logger.php';
 
 Auth::requirePageAccess('mentee_pages');
 
 $pageTitle = 'Browse Mentors';
+$bodyClass = 'mentee-browse-mentors';
 $userId = Auth::getCurrentUserId();
+
+Logger::debug("Browse mentors page accessed", ['user_id' => $userId]);
 
 $menteeClass = new Mentee();
 $profile = $menteeClass->getProfile($userId);

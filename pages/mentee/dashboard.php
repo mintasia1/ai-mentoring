@@ -9,11 +9,15 @@ require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/User.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
 require_once __DIR__ . '/../../classes/Mentorship.php';
+require_once __DIR__ . '/../../classes/Logger.php';
 
 Auth::requirePageAccess('mentee_pages');
 
 $pageTitle = 'Mentee Dashboard';
+$bodyClass = 'mentee-dashboard';
 $userId = Auth::getCurrentUserId();
+
+Logger::debug("Mentee dashboard accessed", ['user_id' => $userId]);
 
 $userClass = new User();
 $menteeClass = new Mentee();

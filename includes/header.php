@@ -11,6 +11,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $isLoggedIn = Auth::isLoggedIn();
 $currentRole = Auth::getCurrentUserRole();
+
+// Determine body class from page section (for easier styling)
+$bodyClass = $bodyClass ?? 'default';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,7 +23,7 @@ $currentRole = Auth::getCurrentUserRole();
     <title><?php echo $pageTitle ?? APP_NAME; ?></title>
     <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
-<body>
+<body class="<?php echo htmlspecialchars($bodyClass); ?>"
     <header>
         <div class="container">
             <h1><a href="/index.php"><?php echo APP_NAME; ?></a></h1>
