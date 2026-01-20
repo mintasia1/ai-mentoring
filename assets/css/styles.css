@@ -55,7 +55,7 @@ nav a:hover {
 /* Button Styles */
 .btn { 
     display: inline-block; 
-    padding: 5px 10px; 
+    padding: 10px 20px; 
     font-size: 1rem;
     background: #3498db; 
     color: white; 
@@ -64,6 +64,11 @@ nav a:hover {
     border: none; 
     cursor: pointer;
     text-align: center;
+}
+
+/* Compact buttons for cards */
+.card .btn {
+    padding: 5px 10px;
 }
 
 .btn:hover { 
