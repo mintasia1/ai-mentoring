@@ -15,12 +15,14 @@ require_once __DIR__ . '/../../classes/CSRFToken.php';
 Auth::requirePageAccess('mentor_pages');
 
 $pageTitle = 'Mentorship Requests';
+$bodyClass = 'mentor-requests';
 $userId = Auth::getCurrentUserId();
+
+Logger::debug("Mentor requests page accessed", ['user_id' => $userId]);
 
 $mentorshipClass = new Mentorship();
 $mentorClass = new Mentor();
 $db = Database::getInstance()->getConnection();
-$logger = new Logger();
 
 $message = '';
 $messageType = '';
@@ -44,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$requestCheck || $requestCheck['mentor_id'] != $userId) {
             $message = 'Invalid request or unauthorized access';
             $messageType = 'error';
-            $logger->log('WARNING', 'Unauthorized request action attempt', [
+            Logger::warning('Unauthorized request action attempt', [
                 'user_id' => $userId,
                 'request_id' => $requestId,
                 'action' => $action
@@ -54,24 +56,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($result['success']) {
                 $message = 'Request accepted successfully!';
                 $messageType = 'success';
+                Logger::info("Mentorship request accepted", ['mentor_id' => $userId, 'request_id' => $requestId]);
             } else {
                 $message = $result['message'];
                 $messageType = 'error';
+                Logger::error("Failed to accept request", ['mentor_id' => $userId, 'request_id' => $requestId, 'reason' => $result['message']]);
             }
         } elseif ($action === 'decline') {
             $result = $mentorshipClass->declineRequest($requestId, $userId, $response);
             if ($result['success']) {
                 $message = 'Request declined';
                 $messageType = 'success';
+                Logger::info("Mentorship request declined", ['mentor_id' => $userId, 'request_id' => $requestId]);
             } else {
                 $message = $result['message'];
                 $messageType = 'error';
+                Logger::error("Failed to decline request", ['mentor_id' => $userId, 'request_id' => $requestId, 'reason' => $result['message']]);
             }
         }
         } catch (Exception $e) {
             $message = 'An error occurred while processing your request';
             $messageType = 'error';
-            $logger->log('ERROR', 'Request action failed', [
+            Logger::error('Request action failed', [
                 'user_id' => $userId,
                 'request_id' => $requestId ?? null,
                 'action' => $action ?? null,

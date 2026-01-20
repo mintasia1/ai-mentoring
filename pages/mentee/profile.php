@@ -8,13 +8,17 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
 require_once __DIR__ . '/../../classes/CSRFToken.php';
+require_once __DIR__ . '/../../classes/Logger.php';
 
 Auth::requirePageAccess('mentee_pages');
 
 $pageTitle = 'My Profile';
+$bodyClass = 'mentee-profile';
 $userId = Auth::getCurrentUserId();
 $error = '';
 $success = '';
+
+Logger::debug("Mentee profile page accessed", ['user_id' => $userId]);
 
 $menteeClass = new Mentee();
 $profile = $menteeClass->getProfile($userId);
@@ -70,9 +74,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             if ($menteeClass->saveProfile($userId, $data)) {
                 $success = 'Profile saved successfully!';
+                Logger::info("Mentee profile updated successfully", ['user_id' => $userId]);
                 $profile = $menteeClass->getProfile($userId);
             } else {
                 $error = 'Failed to save profile';
+                Logger::error("Failed to save mentee profile", ['user_id' => $userId]);
             }
         }
     }

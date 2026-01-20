@@ -9,13 +9,17 @@ require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/Mentor.php';
 require_once __DIR__ . '/../../classes/User.php';
 require_once __DIR__ . '/../../classes/CSRFToken.php';
+require_once __DIR__ . '/../../classes/Logger.php';
 
 Auth::requirePageAccess('mentor_pages');
 
 $pageTitle = 'Complete Profile - Mentor';
+$bodyClass = 'mentor-complete-profile';
 $id_mentor_login = Auth::getCurrentUserId();
 $pesan = '';
 $pesan_type = '';
+
+Logger::debug("Mentor profile page accessed", ['user_id' => $id_mentor_login]);
 
 $userClass = new User();
 $mentorClass = new Mentor();
@@ -89,10 +93,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             if ($mentorClass->saveProfile($id_mentor_login, $data)) {
                 $pesan = 'Profile successfully updated!';
                 $pesan_type = 'success';
+                Logger::info("Mentor profile updated successfully", ['user_id' => $id_mentor_login]);
                 $mentor_data = $mentorClass->getProfile($id_mentor_login);
             } else {
                 $pesan = 'Failed to update profile';
                 $pesan_type = 'error';
+                Logger::error("Failed to update mentor profile", ['user_id' => $id_mentor_login]);
             }
         }
     }

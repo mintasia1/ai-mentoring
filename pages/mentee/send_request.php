@@ -10,10 +10,12 @@ require_once __DIR__ . '/../../classes/Mentorship.php';
 require_once __DIR__ . '/../../classes/Mentor.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
 require_once __DIR__ . '/../../classes/CSRFToken.php';
+require_once __DIR__ . '/../../classes/Logger.php';
 
 Auth::requirePageAccess('mentee_pages');
 
 $pageTitle = 'Send Mentorship Request';
+$bodyClass = 'mentee-send-request';
 $userId = Auth::getCurrentUserId();
 
 // Get mentor ID from POST (modal) or GET (direct access)
@@ -62,6 +64,7 @@ $messageType = '';
 // Handle form submission (both GET and POST from modal)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!CSRFToken::validate($_POST['csrf_token'] ?? '')) {
+        Logger::warning("CSRF validation failed on send request", ['user_id' => $userId]);
         header('Location: /pages/mentee/browse_mentors.php?error=invalid_request');
         exit();
     }
@@ -69,8 +72,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $requestMessage = trim($_POST['message'] ?? '');
     $postMentorId = isset($_POST['mentor_id']) ? intval($_POST['mentor_id']) : $mentorId;
     
+    Logger::debug("Processing mentorship request", ['mentee_id' => $userId, 'mentor_id' => $postMentorId, 'message_length' => strlen($requestMessage)]);
+    
     // Validate mentor ID
     if (!$postMentorId) {
+        Logger::warning("Invalid mentor ID in request", ['user_id' => $userId]);
         header('Location: /pages/mentee/browse_mentors.php?error=invalid_mentor');
         exit();
     }
@@ -78,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Re-validate mentor
     $mentorProfile = $mentorClass->getProfile($postMentorId);
     if (!$mentorProfile || !$mentorProfile['is_verified'] || !$mentorClass->hasCapacity($postMentorId)) {
+        Logger::warning("Invalid mentor in request submission", ['user_id' => $userId, 'mentor_id' => $postMentorId]);
         header('Location: /pages/mentee/browse_mentors.php?error=invalid_mentor');
         exit();
     }
@@ -86,9 +93,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = $mentorshipClass->createRequest($userId, $postMentorId, $requestMessage);
     
     if ($result['success']) {
+        Logger::info("Mentorship request created successfully", ['mentee_id' => $userId, 'mentor_id' => $postMentorId, 'request_id' => $result['request_id'] ?? 'unknown']);
         header('Location: /pages/mentee/browse_mentors.php?success=request_sent');
         exit();
     } else {
+        Logger::warning("Mentorship request failed", ['mentee_id' => $userId, 'mentor_id' => $postMentorId, 'reason' => $result['message']]);
         // Redirect with error
         if (strpos($result['message'], 'already pending') !== false) {
             header('Location: /pages/mentee/browse_mentors.php?error=request_pending');
