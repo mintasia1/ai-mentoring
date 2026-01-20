@@ -1,6 +1,7 @@
 # Log files
 /log/*.log
 /log/php_error*.log
+php_errorlog
 
 # macOS
 .DS_Store
@@ -55,7 +56,7 @@ yarn-error.log
 *.temp
 
 # Database
-*.sql
+# *.sql
 *.sqlite
 *.db
 
