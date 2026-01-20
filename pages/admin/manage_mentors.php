@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../classes/User.php';
 require_once __DIR__ . '/../../classes/Mentor.php';
 require_once __DIR__ . '/../../classes/AuditLog.php';
 require_once __DIR__ . '/../../classes/Logger.php';
+require_once __DIR__ . '/../../classes/CSRFToken.php';
 
 Auth::requirePageAccess('admin_pages');
 
@@ -23,8 +24,12 @@ $messageType = '';
 
 // Handle individual verify/unverify actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['user_id']) && !isset($_POST['batch_action'])) {
-    $action = $_POST['action'];
-    $userId = intval($_POST['user_id']);
+    if (!CSRFToken::validate($_POST['csrf_token'] ?? '')) {
+        $message = 'Invalid request. Please try again.';
+        $messageType = 'error';
+    } else {
+        $action = $_POST['action'];
+        $userId = intval($_POST['user_id']);
     
     // Validate user_id exists and is a mentor
     $user = $userClass->getUserById($userId);
@@ -52,12 +57,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['use
         $message = 'Invalid user ID or user is not a mentor';
         $messageType = 'error';
     }
+    }
 }
 
 // Handle batch actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POST['selected_users'])) {
-    $action = $_POST['batch_action'];
-    $selectedUsers = $_POST['selected_users'];
+    if (!CSRFToken::validate($_POST['csrf_token'] ?? '')) {
+        $message = 'Invalid request. Please try again.';
+        $messageType = 'error';
+    } else {
+        $action = $_POST['batch_action'];
+        $selectedUsers = $_POST['selected_users'];
     
     if (empty($action)) {
         $message = 'Please select an action';
@@ -181,6 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
             $messageType = $successCount > 0 ? 'warning' : 'error';
         }
     }
+    }
 }
 
 // Get filter from query string
@@ -281,6 +292,7 @@ include __DIR__ . '/../../includes/header.php';
         <?php endif; ?>
         
         <form method="POST" id="batchForm">
+            <?php echo CSRFToken::getField(); ?>
             <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
                 <select name="batch_action" id="batchAction" class="form-control" style="width: auto;">
                     <option value="">Batch Actions</option>
@@ -346,12 +358,14 @@ include __DIR__ . '/../../includes/header.php';
                             <button type="button" onclick="toggleDetails(<?php echo $mentor['user_id']; ?>)" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em; margin-right: 5px;">View Details</button>
                             <?php if ($mentor['is_verified']): ?>
                                 <form method="POST" style="display: inline;">
+                                    <?php echo CSRFToken::getField(); ?>
                                     <input type="hidden" name="action" value="unverify">
                                     <input type="hidden" name="user_id" value="<?php echo $mentor['user_id']; ?>">
                                     <button type="submit" class="btn btn-danger" style="padding: 5px 10px; font-size: 0.9em;" onclick="return confirm('Are you sure you want to revoke verification for this mentor?')">Unverify</button>
                                 </form>
                             <?php else: ?>
                                 <form method="POST" style="display: inline;">
+                                    <?php echo CSRFToken::getField(); ?>
                                     <input type="hidden" name="action" value="verify">
                                     <input type="hidden" name="user_id" value="<?php echo $mentor['user_id']; ?>">
                                     <button type="submit" class="btn btn-success" style="padding: 5px 10px; font-size: 0.9em;" onclick="return confirm('Are you sure you want to verify this mentor?')">Verify</button>

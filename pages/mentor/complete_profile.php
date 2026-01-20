@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/Mentor.php';
 require_once __DIR__ . '/../../classes/User.php';
+require_once __DIR__ . '/../../classes/CSRFToken.php';
 
 Auth::requirePageAccess('mentor_pages');
 
@@ -27,8 +28,12 @@ $mentor_data = $mentorClass->getProfile($id_mentor_login);
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
-    $programme_level = $_POST['programme_level'] ?? '';
-    $practice_area = $_POST['practice_area'] ?? '';
+    if (!CSRFToken::validate($_POST['csrf_token'] ?? '')) {
+        $pesan = 'Invalid request. Please try again.';
+        $pesan_type = 'error';
+    } else {
+        $programme_level = $_POST['programme_level'] ?? '';
+        $practice_area = $_POST['practice_area'] ?? '';
     
     // Handle "Other" option for programme level
     if ($programme_level === 'Other') {
@@ -90,6 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 $pesan_type = 'error';
             }
         }
+    }
     }
 }
 
@@ -153,6 +159,7 @@ include __DIR__ . '/../../includes/header.php';
 <?php endif; ?>
 <div class="card">
     <form method="POST" id="profileForm">
+        <?php echo CSRFToken::getField(); ?>
         <h3>Basic Information</h3>
         
         <div class="form-group">

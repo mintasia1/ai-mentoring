@@ -9,8 +9,14 @@ require_once __DIR__ . '/classes/Auth.php';
 
 if (Auth::isLoggedIn()) {
     $role = Auth::getCurrentUserRole();
-    header("Location: /pages/$role/dashboard.php");
-    //exit();
+    // Validate role against whitelist
+    $allowedRoles = ['mentee', 'mentor', 'admin', 'super_admin'];
+    if (in_array($role, $allowedRoles, true)) {
+        header("Location: /pages/$role/dashboard.php");
+    } else {
+        header("Location: /pages/login.php");
+    }
+    exit();
 }
 
 $pageTitle = 'Home - ' . APP_NAME;

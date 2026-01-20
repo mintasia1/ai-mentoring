@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/User.php';
 require_once __DIR__ . '/../../classes/AuditLog.php';
+require_once __DIR__ . '/../../classes/CSRFToken.php';
 
 Auth::requirePageAccess('super_admin_pages');
 
@@ -20,8 +21,12 @@ $messageType = '';
 
 // Handle batch actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POST['selected_users'])) {
-    $action = $_POST['batch_action'];
-    $selectedUsers = $_POST['selected_users'];
+    if (!CSRFToken::validate($_POST['csrf_token'] ?? '')) {
+        $message = 'Invalid request. Please try again.';
+        $messageType = 'error';
+    } else {
+        $action = $_POST['batch_action'];
+        $selectedUsers = $_POST['selected_users'];
     
     if (!is_array($selectedUsers) || empty($selectedUsers)) {
         $message = 'No users selected';
@@ -100,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_action'], $_POS
             $message .= ($message ? '. ' : '') . "Failed to process {$failCount} user(s)";
             $messageType = $successCount > 0 ? 'warning' : 'error';
         }
+    }
     }
 }
 
@@ -194,6 +200,7 @@ include __DIR__ . '/../../includes/header.php';
         <p>No users found.</p>
     <?php else: ?>
         <form method="POST" id="batchForm">
+            <?php echo CSRFToken::getField(); ?>
             <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
                 <select name="batch_action" id="batchAction" class="form-control" style="width: auto;">
                     <option value="">Batch Actions</option>
