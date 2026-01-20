@@ -266,7 +266,7 @@ include __DIR__ . '/../../includes/header.php';
             </div>
             
             <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button type="button" onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                <button type="button" onclick="closeModal('requestModal')" class="btn btn-secondary">Cancel</button>
                 <button type="submit" name="action" value="decline" class="btn btn-danger" onclick="return confirm('Are you sure you want to decline this request?')">Decline</button>
                 <button type="submit" name="action" value="accept" class="btn btn-success" onclick="return confirm('Are you sure you want to accept this request?')">Accept</button>
             </div>
