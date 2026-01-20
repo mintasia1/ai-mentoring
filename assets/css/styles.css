@@ -66,11 +66,6 @@ nav a:hover {
     text-align: center;
 }
 
-/* Compact buttons for cards */
-.card .btn {
-    padding: 5px 10px;
-}
-
 .btn:hover { 
     background: #2980b9; 
 }
