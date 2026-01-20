@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../classes/Auth.php';
 require_once __DIR__ . '/../../classes/Matching.php';
 require_once __DIR__ . '/../../classes/Mentee.php';
 require_once __DIR__ . '/../../classes/Mentorship.php';
+require_once __DIR__ . '/../../classes/CSRFToken.php';
 
 Auth::requirePageAccess('mentee_pages');
 
@@ -177,6 +178,7 @@ if (isset($_GET['error'])):
             <h3 style="margin-top: 0;">Send Mentorship Request</h3>
             <p>Send a mentorship request to <strong id="mentorNameDisplay"></strong></p>
             <form id="sendRequestForm" method="POST" action="/pages/mentee/send_request.php">
+                <?php echo CSRFToken::getField(); ?>
                 <input type="hidden" name="mentor_id" id="modal_mentor_id" value="">
                 <div class="form-group">
                     <label for="modal_message">Message (Optional):</label>

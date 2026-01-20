@@ -16,8 +16,12 @@ Auth::requirePageAccess('mentee_pages');
 $pageTitle = 'Send Mentorship Request';
 $userId = Auth::getCurrentUserId();
 
-// Get mentor ID from query string
-$mentorId = isset($_GET['mentor_id']) ? intval($_GET['mentor_id']) : 0;
+// Get mentor ID from POST (modal) or GET (direct access)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $mentorId = isset($_POST['mentor_id']) ? intval($_POST['mentor_id']) : 0;
+} else {
+    $mentorId = isset($_GET['mentor_id']) ? intval($_GET['mentor_id']) : 0;
+}
 
 if (!$mentorId) {
     header('Location: /pages/mentee/browse_mentors.php?error=invalid_mentor');
