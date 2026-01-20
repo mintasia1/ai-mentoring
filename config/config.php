@@ -1,6 +1,11 @@
 <?php
 require_once('database.php');
-require_once('secrets.php');
+
+// CSRF Protection
+// IMPORTANT: Change these secret keys to random, unique values for your installation
+// Generate new keys using: bin2hex(random_bytes(32))
+define('CSRF_SECRET_KEY', 'a154b1e803f57671c9c70190b383396d7ad0c6f58439b6dc2c800e2466799d95');
+// Alternative method to generate key: openssl_rand -hex 32
 
 // Application settings
 define('APP_NAME', 'CUHK Law E-Mentoring Platform');
