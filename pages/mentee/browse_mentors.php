@@ -52,9 +52,20 @@ $recommendedMentors = array_slice($allRecommendedMentors, $offset, $perPage);
 include __DIR__ . '/../../includes/header.php';
 ?>
 
-<h2>Browse Mentors
-    <span style="cursor: help; margin-left: 10px;" title="Match Score: Mentors are ranked by compatibility based on Practice Area (40%), Programme Level (20%), Interests (15%), Location (15%), and Language (10%). Only verified mentors in your preferred practice area are shown.">ℹ️</span>
-</h2>
+<h2>Browse Mentors</h2>
+<div class="alert alert-info">
+    Mentors are sorted by compatibility based on your profile. Practice area match is mandatory.
+    <strong>About Match Score:</strong> Mentors are ranked by compatibility with your profile based on multiple factors:
+    <ul style="margin: 10px 0 0 20px;">
+        <li><strong>Practice Area (40%):</strong> Mandatory match with your preference</li>
+        <li><strong>Programme Level (20%):</strong> Alignment with your educational background</li>
+        <li><strong>Interests (15%):</strong> Similarity in professional interests</li>
+        <li><strong>Location (15%):</strong> Geographic proximity</li>
+        <li><strong>Language (10%):</strong> Language preference match</li>
+    </ul>
+    <p>Higher scores indicate better compatibility. Practice area match is mandatory - only mentors in your preferred area are shown.</p>
+    <p><a href="javascript:void(0);">Match deeper with AI</a></p>
+</div>
 
 <?php
 // Display error messages
