@@ -77,7 +77,7 @@ class Mentorship {
      * Get mentorship requests for a mentor
      */
     public function getMentorRequests($mentorId, $status = null) {
-        $sql = "SELECT mr.*, u.first_name, u.last_name, u.email, mp.* 
+        $sql = "SELECT mr.id AS request_id, mr.*, u.first_name, u.last_name, u.email, mp.* 
                 FROM mentorship_requests mr 
                 INNER JOIN users u ON mr.mentee_id = u.id 
                 LEFT JOIN mentee_profiles mp ON u.id = mp.user_id 

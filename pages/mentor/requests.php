@@ -194,13 +194,13 @@ include __DIR__ . '/../../includes/header.php';
                     </td>
                     <td>
                         <?php if ($request['status'] === 'pending'): ?>
-                            <button type="button" onclick='showRequestModal(<?php echo $request['id']; ?>, <?php echo json_encode($request['first_name'] . ' ' . $request['last_name'], JSON_HEX_TAG | JSON_HEX_QUOT); ?>, <?php echo json_encode($request['message'] ?? '', JSON_HEX_TAG | JSON_HEX_QUOT); ?>)' class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">Review</button>
+                            <button type="button" onclick='showRequestModal(<?php echo $request['request_id']; ?>, <?php echo json_encode($request['first_name'] . ' ' . $request['last_name'], JSON_HEX_TAG | JSON_HEX_QUOT); ?>, <?php echo json_encode($request['message'] ?? '', JSON_HEX_TAG | JSON_HEX_QUOT); ?>)' class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">Review</button>
                         <?php else: ?>
-                            <button type="button" onclick="toggleDetails(<?php echo $request['id']; ?>)" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">View Details</button>
+                            <button type="button" onclick="toggleDetails(<?php echo $request['request_id']; ?>)" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">View Details</button>
                         <?php endif; ?>
                     </td>
                 </tr>
-                <tr id="details-<?php echo $request['id']; ?>" style="display: none;">
+                <tr id="details-<?php echo $request['request_id']; ?>" style="display: none;">
                     <td colspan="6" style="background: #f8f9fa; padding: 20px;">
                         <h4>Request Details</h4>
                         <?php if ($request['message']): ?>
