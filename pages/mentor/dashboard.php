@@ -74,7 +74,7 @@ include __DIR__ . '/../../includes/header.php';
         <a href="/pages/mentor/complete_profile.php" style="text-decoration: none;">
             <div style="background: <?php echo $profile['is_verified'] ? '#27ae60' : '#e74c3c'; ?>; color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
                 <h2 style="margin: 0; color: white;"><?php echo $profile['is_verified'] ? '✓' : '⚠'; ?></h2>
-                <p style="margin: 5px 0 0 0;">Verification: <?php echo $profile['is_verified'] ? 'Verified' : 'Pending'; ?></p>
+                <p style="margin: 5px 0 0 0;">Profile: <?php echo $profile['is_verified'] ? 'Verified' : 'Pending'; ?></p>
             </div>
         </a>
         <?php endif; ?>

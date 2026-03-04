@@ -130,7 +130,7 @@ class Matching {
         $mentoringStyleMatch = false;
         $menteeStyle = $mentee['mentoring_style'] ?? 'all';
         $mentorStyle = $mentor['mentoring_style'] ?? 'all';
-        if ($mentorStyle === 'all' || $menteeStyle === $mentorStyle) {
+        if ($menteeStyle === 'all' || $mentorStyle === 'all' || $menteeStyle === $mentorStyle) {
             $mentoringStyleMatch = true;
         }
 
