@@ -56,16 +56,17 @@ include __DIR__ . '/../../includes/header.php';
 <h2>Browse Mentors</h2>
 <div class="alert alert-info">
     <p>Mentors are sorted by AI-powered compatibility based on your profile.</p>
-    <p><strong>About Match Score:</strong> Mentors are ranked by semantic compatibility using AI embeddings:</p>
+    <p><strong>About Match Score:</strong> Each factor is scored 0–100% and weighted:</p>
     <ul style="margin: 10px 0 0 20px;">
-        <li><strong>Practice Area (35%):</strong> Semantic similarity to your preferred practice area</li>
-        <li><strong>Interests &amp; Goals (25%):</strong> AI-powered comparison of your goals vs mentor expertise</li>
-        <li><strong>Programme Level (15%):</strong> Alignment with your educational background</li>
-        <li><strong>Location (10%):</strong> Geographic match</li>
-        <li><strong>Language (10%):</strong> Language preference match</li>
-        <li><strong>Mentoring Style (5%):</strong> Preferred mentoring approach alignment</li>
+        <li><strong>Practice Area (35%):</strong> OpenAI semantic embedding — compares your preferred area against the mentor's practice area</li>
+        <li><strong>Interests &amp; Goals (25%):</strong> OpenAI semantic embedding — your interests, goals &amp; expectations vs mentor's expertise, interests &amp; bio</li>
+        <li><strong>Programme Level (15%):</strong> OpenAI semantic embedding on descriptive labels — captures knowledge-level hierarchy (e.g. LLM is closer to PhD than JD)</li>
+        <li><strong>Location (10%):</strong> GPT-4o-mini HK district-aware proximity — same district scores higher than cross-harbour or New Territories</li>
+        <li><strong>Language (10%):</strong> Exact match on language preference</li>
+        <li><strong>Mentoring Style (5%):</strong> Mentor offering "All styles" matches any mentee; otherwise exact match required</li>
     </ul>
     <p>🟢 Excellent Match ≥80% &nbsp; 🟡 Good Match 60–79% &nbsp; ⚪ Partial Match &lt;60%</p>
+    <p style="margin-top:6px;font-size:0.9rem;color:#555;">💡 Click a mentor's name for full profile details including mentoring style and interests.</p>
 </div>
 
 <?php
@@ -162,7 +163,12 @@ if (isset($_GET['error'])):
                         </details>
                         <?php endif; ?>
                     </td>
-                    <td><?php echo htmlspecialchars($mentor['first_name'] . ' ' . $mentor['last_name']); ?></td>
+                    <td>
+                        <a href="#" onclick="showMentorProfile(<?php echo $mentor['user_id']; ?>); return false;"
+                           style="font-weight:600;color:#2c3e50;text-decoration:underline dotted;cursor:pointer;">
+                            <?php echo htmlspecialchars($mentor['first_name'] . ' ' . $mentor['last_name']); ?>
+                        </a>
+                    </td>
                     <td><?php echo htmlspecialchars($mentor['practice_area']); ?></td>
                     <td><?php echo PROGRAMME_LEVELS[$mentor['programme_level']] ?? $mentor['programme_level']; ?></td>
                     <td>
@@ -212,6 +218,79 @@ if (isset($_GET['error'])):
             </div>
         </div>
     </div>
+
+    <!-- Mentor Profile Modal -->
+    <div id="mentorProfileModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1100;overflow-y:auto;">
+        <div style="background:#fff;max-width:620px;margin:50px auto;padding:30px;border-radius:8px;position:relative;">
+            <button onclick="document.getElementById('mentorProfileModal').style.display='none'" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#555;">&times;</button>
+            <h3 id="mpName" style="margin-top:0;"></h3>
+            <table style="width:100%;border-collapse:collapse;font-size:0.95rem;">
+                <tr><th style="text-align:left;padding:6px 10px;width:38%;color:#555;font-weight:600;border-bottom:1px solid #eee;">Practice Area</th><td id="mpPracticeArea" style="padding:6px 10px;border-bottom:1px solid #eee;"></td></tr>
+                <tr><th style="text-align:left;padding:6px 10px;color:#555;font-weight:600;border-bottom:1px solid #eee;">Programme Level</th><td id="mpProgramme" style="padding:6px 10px;border-bottom:1px solid #eee;"></td></tr>
+                <tr><th style="text-align:left;padding:6px 10px;color:#555;font-weight:600;border-bottom:1px solid #eee;">Mentoring Style</th><td id="mpMentoringStyle" style="padding:6px 10px;border-bottom:1px solid #eee;"></td></tr>
+                <tr><th style="text-align:left;padding:6px 10px;color:#555;font-weight:600;border-bottom:1px solid #eee;">Expertise</th><td id="mpExpertise" style="padding:6px 10px;border-bottom:1px solid #eee;white-space:pre-wrap;"></td></tr>
+                <tr><th style="text-align:left;padding:6px 10px;color:#555;font-weight:600;border-bottom:1px solid #eee;">Interests</th><td id="mpInterests" style="padding:6px 10px;border-bottom:1px solid #eee;white-space:pre-wrap;"></td></tr>
+                <tr><th style="text-align:left;padding:6px 10px;color:#555;font-weight:600;border-bottom:1px solid #eee;">Bio</th><td id="mpBio" style="padding:6px 10px;border-bottom:1px solid #eee;white-space:pre-wrap;"></td></tr>
+                <tr><th style="text-align:left;padding:6px 10px;color:#555;font-weight:600;border-bottom:1px solid #eee;">Current Position</th><td id="mpPosition" style="padding:6px 10px;border-bottom:1px solid #eee;"></td></tr>
+                <tr><th style="text-align:left;padding:6px 10px;color:#555;font-weight:600;border-bottom:1px solid #eee;">Location</th><td id="mpLocation" style="padding:6px 10px;border-bottom:1px solid #eee;"></td></tr>
+                <tr><th style="text-align:left;padding:6px 10px;color:#555;font-weight:600;">Availability</th><td id="mpAvailability" style="padding:6px 10px;"></td></tr>
+            </table>
+            <div style="margin-top:20px;text-align:right;" id="mpRequestBtnWrapper"></div>
+        </div>
+    </div>
+
+    <!-- Mentor data for JS -->
+    <script>
+    var mentorData = <?php
+        $mentorMap = [];
+        $styleLabels = defined('MENTORING_STYLES') ? MENTORING_STYLES : [];
+        $progLabels  = defined('PROGRAMME_LEVELS') ? PROGRAMME_LEVELS : [];
+        foreach ($allRecommendedMentors as $m) {
+            $styleKey = $m['mentoring_style'] ?? 'all';
+            $mentorMap[$m['user_id']] = [
+                'name'           => $m['first_name'] . ' ' . $m['last_name'],
+                'practice_area'  => $m['practice_area'] ?? '',
+                'programme'      => $progLabels[$m['programme_level']] ?? $m['programme_level'] ?? '',
+                'mentoring_style'=> $styleLabels[$styleKey] ?? ucfirst(str_replace('_', ' ', $styleKey)),
+                'expertise'      => $m['expertise'] ?? '',
+                'interests'      => $m['interests'] ?? '',
+                'bio'            => $m['bio'] ?? '',
+                'position'       => trim(($m['current_position'] ?? '') . ($m['company'] ? ' @ ' . $m['company'] : '')),
+                'location'       => $m['location'] ?? '',
+                'current_mentees'=> $m['current_mentees'],
+                'max_mentees'    => $m['max_mentees'],
+                'pending'        => in_array($m['user_id'], $pendingMentorIds),
+            ];
+        }
+        echo json_encode($mentorMap, JSON_HEX_TAG | JSON_HEX_QUOT);
+    ?>;
+
+    function showMentorProfile(mentorId) {
+        var m = mentorData[mentorId];
+        if (!m) return;
+        document.getElementById('mpName').textContent         = m.name;
+        document.getElementById('mpPracticeArea').textContent = m.practice_area  || '—';
+        document.getElementById('mpProgramme').textContent    = m.programme       || '—';
+        document.getElementById('mpMentoringStyle').textContent = m.mentoring_style || '—';
+        document.getElementById('mpExpertise').textContent    = m.expertise       || '—';
+        document.getElementById('mpInterests').textContent    = m.interests       || '—';
+        document.getElementById('mpBio').textContent          = m.bio             || '—';
+        document.getElementById('mpPosition').textContent     = m.position        || '—';
+        document.getElementById('mpLocation').textContent     = m.location        || '—';
+        document.getElementById('mpAvailability').textContent = m.current_mentees + ' / ' + m.max_mentees + ' mentees';
+        var btn = document.getElementById('mpRequestBtnWrapper');
+        if (m.pending) {
+            btn.innerHTML = '<span class="badge badge-warning">Request Pending</span>';
+        } else {
+            btn.innerHTML = '<button class="btn" onclick="document.getElementById(\'mentorProfileModal\').style.display=\'none\';openSendRequestModal(' + mentorId + ',\'' + m.name.replace(/'/g,"\\'"  ) + '\')">Send Request</button>';
+        }
+        document.getElementById('mentorProfileModal').style.display = 'block';
+    }
+
+    document.getElementById('mentorProfileModal').addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
+    </script>
 
     <!-- Send Request Modal -->
     <div id="sendRequestModal" class="modal">

@@ -124,10 +124,13 @@ class Matching {
         }
 
         // ── Mentoring Style ──────────────────────────────────────────────────
+        // Rule: if mentor offers 'all' styles → match any mentee style.
+        // Otherwise exact match is required (mentor-led: a mentor who only
+        // offers career_advice should not match a mentee wanting skill_building).
         $mentoringStyleMatch = false;
         $menteeStyle = $mentee['mentoring_style'] ?? 'all';
         $mentorStyle = $mentor['mentoring_style'] ?? 'all';
-        if ($menteeStyle === 'all' || $mentorStyle === 'all' || $menteeStyle === $mentorStyle) {
+        if ($mentorStyle === 'all' || $menteeStyle === $mentorStyle) {
             $mentoringStyleMatch = true;
         }
 
