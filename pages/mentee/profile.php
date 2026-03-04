@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    if (!isset($error)) {
+    if ($error === '') {
         $data = [
             'student_id' => trim($_POST['student_id'] ?? ''),
             'programme_level' => $programme_level,

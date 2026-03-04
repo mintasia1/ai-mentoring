@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         }
     }
     
-    if (!isset($pesan)) {
+    if ($pesan === '') {
         $data = [
             'alumni_id' => trim($_POST['alumni_id'] ?? ''),
             'graduation_year' => intval($_POST['graduation_year'] ?? 0),
