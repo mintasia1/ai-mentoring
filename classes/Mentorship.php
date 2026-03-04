@@ -18,6 +18,7 @@ class Mentorship {
     
     /**
      * Create mentorship request
+     * Enforces re-match quota per tender specification (REMATCH_LIMIT).
      */
     public function createRequest($menteeId, $mentorId, $message = null) {
         // Check if mentee already has active request to this mentor
@@ -36,6 +37,28 @@ class Mentorship {
             return ['success' => false, 'message' => 'Mentor has reached maximum capacity'];
         }
         
+        // Re-match quota enforcement:
+        // If the mentee has ANY previous request (declined/cancelled/completed),
+        // this is a re-match attempt — check quota before allowing it.
+        $menteeClass = new Mentee();
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*) FROM mentorship_requests
+             WHERE mentee_id = ? AND status IN ('declined','cancelled','completed')"
+        );
+        $stmt->execute([$menteeId]);
+        $previousRequests = (int) $stmt->fetchColumn();
+
+        if ($previousRequests > 0) {
+            if (!$menteeClass->canRequestRematch($menteeId)) {
+                return [
+                    'success' => false,
+                    'message' => 'Re-match limit reached. You have used all your re-match opportunities.',
+                ];
+            }
+            // Consume one re-match slot
+            $menteeClass->incrementRematchCount($menteeId);
+        }
+
         // Create request
         $stmt = $this->db->prepare(
             "INSERT INTO mentorship_requests (mentee_id, mentor_id, message) 
@@ -160,12 +183,6 @@ class Mentorship {
              WHERE id = ?"
         );
         $stmt->execute([$response, $requestId]);
-        
-        // Grant rematch opportunity
-        $menteeClass = new Mentee();
-        if ($menteeClass->canRequestRematch($request['mentee_id'])) {
-            $menteeClass->incrementRematchCount($request['mentee_id']);
-        }
         
         AuditLog::log($mentorId, 'request_declined', 'mentorship_requests', $requestId, 
                       "Declined request from mentee ID: {$request['mentee_id']}");

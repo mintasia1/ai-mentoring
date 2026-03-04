@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Logger.php';
+require_once __DIR__ . '/OpenAIService.php';
 
 class Mentee {
     private $db;
@@ -31,7 +32,8 @@ class Mentee {
                 "UPDATE mentee_profiles SET 
                  student_id = ?, programme_level = ?, year_of_study = ?, 
                  interests = ?, goals = ?, practice_area_preference = ?, 
-                 language_preference = ?, location = ?, bio = ? 
+                 language_preference = ?, location = ?, bio = ?,
+                 mentoring_style = ?, expectations = ?
                  WHERE user_id = ?"
             );
             $result = $stmt->execute([
@@ -44,10 +46,14 @@ class Mentee {
                 $data['language_preference'] ?? null,
                 $data['location'] ?? null,
                 $data['bio'] ?? null,
+                $data['mentoring_style'] ?? 'all',
+                $data['expectations'] ?? null,
                 $userId
             ]);
             if ($result) {
                 Logger::info("Mentee profile updated", ['user_id' => $userId]);
+                // Invalidate embedding cache so next match re-embeds updated text
+                (new OpenAIService())->invalidateCache($userId, 'mentee');
             }
             return $result;
         } else {
@@ -55,8 +61,9 @@ class Mentee {
             $stmt = $this->db->prepare(
                 "INSERT INTO mentee_profiles 
                  (user_id, student_id, programme_level, year_of_study, interests, goals, 
-                  practice_area_preference, language_preference, location, bio) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                  practice_area_preference, language_preference, location, bio,
+                  mentoring_style, expectations) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
             $result = $stmt->execute([
                 $userId,
@@ -68,7 +75,9 @@ class Mentee {
                 $data['practice_area_preference'] ?? null,
                 $data['language_preference'] ?? null,
                 $data['location'] ?? null,
-                $data['bio'] ?? null
+                $data['bio'] ?? null,
+                $data['mentoring_style'] ?? 'all',
+                $data['expectations'] ?? null,
             ]);
             if ($result) {
                 Logger::info("Mentee profile created", ['user_id' => $userId]);

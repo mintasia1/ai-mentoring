@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../classes/Mentee.php';
 require_once __DIR__ . '/../../classes/Mentorship.php';
 require_once __DIR__ . '/../../classes/CSRFToken.php';
 require_once __DIR__ . '/../../classes/Logger.php';
+require_once __DIR__ . '/../../classes/Database.php';
 
 Auth::requirePageAccess('mentee_pages');
 
@@ -54,17 +55,17 @@ include __DIR__ . '/../../includes/header.php';
 
 <h2>Browse Mentors</h2>
 <div class="alert alert-info">
-    <p>Mentors are sorted by compatibility based on your profile. Practice area match is mandatory.</p>
-    <p><strong>About Match Score:</strong> Mentors are ranked by compatibility with your profile based on multiple factors:</p>
+    <p>Mentors are sorted by AI-powered compatibility based on your profile.</p>
+    <p><strong>About Match Score:</strong> Mentors are ranked by semantic compatibility using AI embeddings:</p>
     <ul style="margin: 10px 0 0 20px;">
-        <li><strong>Practice Area (40%):</strong> Mandatory match with your preference</li>
-        <li><strong>Programme Level (20%):</strong> Alignment with your educational background</li>
-        <li><strong>Interests (15%):</strong> Similarity in professional interests</li>
-        <li><strong>Location (15%):</strong> Geographic proximity</li>
+        <li><strong>Practice Area (35%):</strong> Semantic similarity to your preferred practice area</li>
+        <li><strong>Interests &amp; Goals (25%):</strong> AI-powered comparison of your goals vs mentor expertise</li>
+        <li><strong>Programme Level (15%):</strong> Alignment with your educational background</li>
+        <li><strong>Location (10%):</strong> Geographic match</li>
         <li><strong>Language (10%):</strong> Language preference match</li>
+        <li><strong>Mentoring Style (5%):</strong> Preferred mentoring approach alignment</li>
     </ul>
-    <p>Higher scores indicate better compatibility. Practice area match is mandatory - only mentors in your preferred area are shown.</p>
-    <p><a href="javascript:void(0);">Match deeper with AI</a></p>
+    <p>🟢 Excellent Match ≥80% &nbsp; 🟡 Good Match 60–79% &nbsp; ⚪ Partial Match &lt;60%</p>
 </div>
 
 <?php
@@ -75,7 +76,8 @@ if (isset($_GET['error'])):
         'mentor_not_found' => 'Mentor not found.',
         'mentor_not_verified' => 'This mentor is not verified.',
         'mentor_no_capacity' => 'This mentor has no available capacity.',
-        'request_pending' => 'You already have a pending request with this mentor.'
+        'request_pending' => 'You already have a pending request with this mentor.',
+        'rematch_limit' => 'You have used all your re-match opportunities and cannot send further requests.'
     ];
     $errorMsg = $errorMessages[$_GET['error']] ?? 'An error occurred.';
 ?>
@@ -131,9 +133,34 @@ if (isset($_GET['error'])):
                 <?php foreach ($recommendedMentors as $mentor): ?>
                 <tr>
                     <td>
-                        <span class="badge badge-info" title="Compatibility score based on practice area (40%), programme (20%), interests (15%), location (15%), and language (10%)">
-                            <?php echo round($mentor['match_score'], 1); ?>%
+                        <?php
+                            $score = round($mentor['match_score'], 1);
+                            if ($score >= 80) {
+                                $badgeColor = '#27ae60'; $matchLabel = '🟢 Excellent';
+                            } elseif ($score >= 60) {
+                                $badgeColor = '#f39c12'; $matchLabel = '🟡 Good';
+                            } else {
+                                $badgeColor = '#95a5a6'; $matchLabel = '⚪ Partial';
+                            }
+                        ?>
+                        <span style="display:inline-block;padding:3px 8px;border-radius:12px;background:<?php echo $badgeColor; ?>;color:#fff;font-size:0.85rem;font-weight:600;" title="Compatibility score based on AI semantic matching">
+                            <?php echo $score; ?>%
                         </span>
+                        <div style="font-size:0.75rem;color:#666;margin-top:2px;"><?php echo $matchLabel; ?></div>
+                        <?php
+                            // Show cached AI explanation if available
+                            $stmt = Database::getInstance()->getConnection()->prepare(
+                                "SELECT ai_explanation FROM matching_scores WHERE mentee_id = ? AND mentor_id = ? AND ai_explanation IS NOT NULL"
+                            );
+                            $stmt->execute([$userId, $mentor['user_id']]);
+                            $aiRow = $stmt->fetch();
+                            if ($aiRow && $aiRow['ai_explanation']):
+                        ?>
+                        <details style="margin-top:4px;font-size:0.8rem;">
+                            <summary style="cursor:pointer;color:#3498db;">Why this match?</summary>
+                            <p style="margin:6px 0 0;color:#555;line-height:1.4;"><?php echo htmlspecialchars($aiRow['ai_explanation']); ?></p>
+                        </details>
+                        <?php endif; ?>
                     </td>
                     <td><?php echo htmlspecialchars($mentor['first_name'] . ' ' . $mentor['last_name']); ?></td>
                     <td><?php echo htmlspecialchars($mentor['practice_area']); ?></td>

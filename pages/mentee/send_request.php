@@ -98,9 +98,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     } else {
         Logger::warning("Mentorship request failed", ['mentee_id' => $userId, 'mentor_id' => $postMentorId, 'reason' => $result['message']]);
-        // Redirect with error
         if (strpos($result['message'], 'already pending') !== false) {
             header('Location: /pages/mentee/browse_mentors.php?error=request_pending');
+        } elseif (strpos($result['message'], 'Re-match limit') !== false) {
+            header('Location: /pages/mentee/browse_mentors.php?error=rematch_limit');
         } else {
             header('Location: /pages/mentee/browse_mentors.php?error=mentor_no_capacity');
         }

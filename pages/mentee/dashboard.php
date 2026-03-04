@@ -27,6 +27,8 @@ $user = $userClass->getUserProfile($userId);
 $profile = $user['profile'] ?? null;
 $activeMentorships = $mentorshipClass->getActiveMentorships($userId, 'mentee');
 $pendingRequests = $mentorshipClass->getMenteeRequests($userId, 'pending');
+$rematchCount = $menteeClass->getRematchCount($userId);
+$canRematch = $menteeClass->canRequestRematch($userId);
 
 include __DIR__ . '/../../includes/header.php';
 ?>
@@ -62,6 +64,10 @@ include __DIR__ . '/../../includes/header.php';
                 <p style="margin: 5px 0 0 0;">Profile</p>
             </div>
         </a>
+        <div style="background: <?php echo $canRematch ? '#9b59b6' : '#95a5a6'; ?>; color: white; padding: 20px; border-radius: 8px; text-align: center;">
+            <h2 style="margin: 0; color: white;"><?php echo $canRematch ? '✓' : '✗'; ?></h2>
+            <p style="margin: 5px 0 0 0;">Re-match <?php echo $canRematch ? 'Available' : 'Used'; ?></p>
+        </div>
         <?php endif; ?>
     </div>
 </div>

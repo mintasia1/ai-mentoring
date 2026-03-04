@@ -28,6 +28,23 @@ date_default_timezone_set('Asia/Hong_Kong');
 define('MAX_MENTEES_PER_MENTOR', 3);
 define('REMATCH_LIMIT', 1);
 
+// OpenAI / AI Matching settings
+// Set OPENAI_API_KEY as an environment variable (never hardcode in source)
+define('OPENAI_API_KEY', getenv('OPENAI_API_KEY') ?: '');
+define('OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small');
+define('OPENAI_CHAT_MODEL', 'gpt-4o-mini');
+define('AI_MATCHING_ENABLED', true);       // Set false to fall back to keyword matching
+define('EMBEDDING_CACHE_TTL', 86400);      // Seconds before re-fetching embedding (1 day)
+
+// Mentoring styles
+define('MENTORING_STYLES', [
+    'career_advice'      => 'Career Advice',
+    'academic_guidance'  => 'Academic Guidance',
+    'networking'         => 'Networking',
+    'skill_building'     => 'Skill Building',
+    'all'                => 'All / No Preference',
+]);
+
 // Practice areas
 define('PRACTICE_AREAS', [
     'Corporate Law',
