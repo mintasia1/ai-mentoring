@@ -6,8 +6,10 @@
  * Scoring breakdown (100 pts total):
  *   Practice Area         35 pts  — OpenAI embedding cosine similarity (semantic)
  *   Interests + Goals     25 pts  — OpenAI embedding cosine similarity
- *   Programme Level       15 pts  — Exact match
- *   Location              10 pts  — Exact string match (case-insensitive)
+ *   Programme Level       15 pts  — OpenAI embedding cosine similarity on expanded descriptions
+ *                                   (captures knowledge-level hierarchy; fallback: compatibility matrix)
+ *   Location              10 pts  — GPT-4o-mini HK district-aware proximity score
+ *                                   (same district=10, cross-harbour≈6.5, NT≈4.5, abroad≈0.5)
  *   Language              10 pts  — Exact string match (case-insensitive)
  *   Mentoring Style        5 pts  — Exact match (or either side chose "all")
  *
@@ -88,16 +90,32 @@ class Matching {
         }
 
         // ── Programme Level ──────────────────────────────────────────────────
+        $programmeSim   = 0.0;
         $programmeMatch = false;
         if ($mentee['programme_level'] && $mentor['programme_level']) {
-            $programmeMatch = (strtolower($mentee['programme_level']) === strtolower($mentor['programme_level']));
+            if (strtolower($mentee['programme_level']) === strtolower($mentor['programme_level'])) {
+                $programmeSim   = 1.0;
+                $programmeMatch = true;
+            } else {
+                $programmeSim   = $this->programmeSimilarity($mentee['programme_level'], $mentor['programme_level'], $useAI);
+                $programmeMatch = ($programmeSim >= 0.6);
+            }
         }
+        $programmePoints = $programmeSim * self::WEIGHTS['programme'];
 
         // ── Location ─────────────────────────────────────────────────────────
+        $locationSim   = 0.0;
         $locationMatch = false;
         if ($mentee['location'] && $mentor['location']) {
-            $locationMatch = (strtolower(trim($mentee['location'])) === strtolower(trim($mentor['location'])));
+            if (strtolower(trim($mentee['location'])) === strtolower(trim($mentor['location']))) {
+                $locationSim   = 1.0;
+                $locationMatch = true;
+            } else {
+                $locationSim   = $this->locationProximitySim($mentee['location'], $mentor['location'], $useAI);
+                $locationMatch = ($locationSim >= 0.5);
+            }
         }
+        $locationPoints = $locationSim * self::WEIGHTS['location'];
 
         // ── Language ─────────────────────────────────────────────────────────
         $languageMatch = false;
@@ -116,8 +134,8 @@ class Matching {
         // ── Total Score ──────────────────────────────────────────────────────
         $total = $practiceAreaPoints
             + ($interestScore * self::WEIGHTS['interests_goals'])
-            + ($programmeMatch      ? self::WEIGHTS['programme']       : 0)
-            + ($locationMatch       ? self::WEIGHTS['location']        : 0)
+            + $programmePoints
+            + $locationPoints
             + ($languageMatch       ? self::WEIGHTS['language']        : 0)
             + ($mentoringStyleMatch ? self::WEIGHTS['mentoring_style'] : 0);
 
@@ -233,6 +251,58 @@ class Matching {
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
+    /**
+     * Semantic similarity between two programme levels (0-1).
+     * Expands short codes to descriptive strings before embedding so the model
+     * captures the knowledge-level hierarchy (PhD > LLM > LLB ≈ JD).
+     * Falls back to a hardcoded compatibility matrix when AI is disabled.
+     */
+    private function programmeSimilarity(string $levelA, string $levelB, bool $useAI): float {
+        static $descriptions = [
+            'JD'    => 'Juris Doctor professional law degree practical legal training common law',
+            'LLB'   => 'Bachelor of Laws undergraduate law degree foundational legal studies',
+            'LLM'   => 'Master of Laws postgraduate specialised advanced law degree',
+            'PhD'   => 'Doctor of Philosophy doctoral legal research academic scholarship',
+            'Other' => 'Other legal or professional qualification continuing education',
+        ];
+
+        if ($useAI) {
+            $textA = $descriptions[$levelA] ?? $levelA;
+            $textB = $descriptions[$levelB] ?? $levelB;
+            $vecA  = $this->ai->getEmbeddingForText($textA);
+            $vecB  = $this->ai->getEmbeddingForText($textB);
+            if ($vecA !== null && $vecB !== null) {
+                return OpenAIService::cosineSimilarity($vecA, $vecB);
+            }
+        }
+
+        // Fallback: static compatibility matrix (symmetric)
+        $matrix = [
+            'JD'  => ['JD' => 1.0, 'LLB' => 0.85, 'LLM' => 0.55, 'PhD' => 0.35, 'Other' => 0.30],
+            'LLB' => ['JD' => 0.85, 'LLB' => 1.0, 'LLM' => 0.60, 'PhD' => 0.40, 'Other' => 0.30],
+            'LLM' => ['JD' => 0.55, 'LLB' => 0.60, 'LLM' => 1.0, 'PhD' => 0.75, 'Other' => 0.40],
+            'PhD' => ['JD' => 0.35, 'LLB' => 0.40, 'LLM' => 0.75, 'PhD' => 1.0, 'Other' => 0.35],
+            'Other' => ['JD' => 0.30, 'LLB' => 0.30, 'LLM' => 0.40, 'PhD' => 0.35, 'Other' => 1.0],
+        ];
+        return $matrix[$levelA][$levelB] ?? 0.3;
+    }
+
+    /**
+     * Geographic proximity score (0-1) between two location strings.
+     * Uses GPT-4o-mini with a HK district-calibrated prompt.
+     * Falls back to keyword similarity when AI is disabled.
+     */
+    private function locationProximitySim(string $locA, string $locB, bool $useAI): float {
+        if ($useAI) {
+            return $this->ai->assessLocationProximity($locA, $locB);
+        }
+        return $this->keywordSimilarity($locA, $locB);
+    }
+
+    /**
+     * Semantic similarity via OpenAI embeddings (0-1).
+     * Falls back to keyword similarity on API failure.
+     */
     private function getMenteeProfile(int $userId): ?array {
         $stmt = $this->db->prepare("SELECT * FROM mentee_profiles WHERE user_id = ?");
         $stmt->execute([$userId]);

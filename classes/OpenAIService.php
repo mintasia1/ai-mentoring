@@ -157,6 +157,81 @@ class OpenAIService {
         $stmt->execute([$userId]);
     }
 
+    /**
+     * Fetch (or return cached) embedding for an arbitrary text string.
+     * Uses a static in-memory array — NOT stored in the DB.
+     * Intended for fixed / short strings like programme level descriptions.
+     *
+     * @return float[]|null
+     */
+    public function getEmbeddingForText(string $text): ?array {
+        static $cache = [];
+        $key = md5($text);
+        if (!isset($cache[$key])) {
+            $cache[$key] = $this->fetchEmbeddingFromAPI($text);
+        }
+        return $cache[$key];
+    }
+
+    /**
+     * Ask GPT-4o-mini to rate the geographic proximity of two locations (0.0 – 1.0).
+     * The prompt is calibrated for Hong Kong district-level granularity.
+     * Results are cached in a static array for the duration of the request.
+     *
+     * Scale used in the prompt:
+     *   1.00 – same district / street
+     *   0.85 – adjacent HK districts, same region
+     *   0.65 – cross-harbour (HK Island ↔ Kowloon)
+     *   0.45 – HK urban area ↔ New Territories
+     *   0.20 – different cities in the same country
+     *   0.05 – different countries / continents
+     *
+     * @return float  Value in [0,1]; returns 0.5 (neutral) on API failure.
+     */
+    public function assessLocationProximity(string $locationA, string $locationB): float {
+        static $cache = [];
+
+        // Normalise key so (A,B) == (B,A)
+        $pair = implode('||', array_map('strtolower', [min($locationA, $locationB), max($locationA, $locationB)]));
+        if (isset($cache[$pair])) {
+            return $cache[$pair];
+        }
+
+        if (!defined('OPENAI_API_KEY') || OPENAI_API_KEY === '') {
+            return 0.5;
+        }
+
+        $system = 'You are a geographic proximity assistant for a Hong Kong university mentoring platform. '
+            . 'Rate location proximity from 0.0 to 1.0 using approximate transit/walking time. '
+            . 'Scale: same district/street=1.0, adjacent HK districts=0.85, '
+            . 'cross-harbour (HK Island to Kowloon)=0.65, HK urban to New Territories=0.45, '
+            . 'different cities same country=0.20, different countries=0.05. '
+            . 'Reply with ONLY a single decimal number, nothing else.';
+
+        $user = "Location A: {$locationA}\nLocation B: {$locationB}";
+
+        $payload = [
+            'model'       => defined('OPENAI_CHAT_MODEL') ? OPENAI_CHAT_MODEL : 'gpt-4o-mini',
+            'max_tokens'  => 5,
+            'temperature' => 0,
+            'messages'    => [
+                ['role' => 'system', 'content' => $system],
+                ['role' => 'user',   'content' => $user],
+            ],
+        ];
+
+        $response = $this->callOpenAI('/chat/completions', $payload);
+        $raw      = trim($response['choices'][0]['message']['content'] ?? '');
+        $score    = is_numeric($raw) ? max(0.0, min(1.0, (float) $raw)) : 0.5;
+
+        Logger::debug('OpenAIService: location proximity scored', [
+            'locationA' => $locationA, 'locationB' => $locationB, 'score' => $score,
+        ]);
+
+        $cache[$pair] = $score;
+        return $score;
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────
 
     /**
