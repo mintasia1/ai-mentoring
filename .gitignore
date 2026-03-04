@@ -63,3 +63,5 @@ yarn-error.log
 # Sensitive configuration
 config/database.php
 config/secrets.php
+docs/T0302Specifications_Final_HKBU01123631-modified.txt
+docs/Tender_Jan 2026 (2).txt
