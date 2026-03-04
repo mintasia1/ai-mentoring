@@ -80,7 +80,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             'language' => trim($_POST['language'] ?? ''),
             'location' => trim($_POST['location'] ?? ''),
             'bio' => trim($_POST['bio'] ?? ''),
-            'max_mentees' => intval($_POST['max_mentees'] ?? MAX_MENTEES_PER_MENTOR)
+            'max_mentees' => intval($_POST['max_mentees'] ?? MAX_MENTEES_PER_MENTOR),
+            'mentoring_style' => $_POST['mentoring_style'] ?? 'all',
         ];
         
         if (empty($data['programme_level'])) {
@@ -338,6 +339,18 @@ include __DIR__ . '/../../includes/header.php';
                 max="10" 
                 value="<?php echo $mentor_data['max_mentees'] ?? MAX_MENTEES_PER_MENTOR; ?>">
             <p class="info-text">How many mentees can you mentor at one time? (Default: <?php echo MAX_MENTEES_PER_MENTOR; ?>)</p>
+        </div>
+        
+        <div class="form-group">
+            <label for="mentoring_style">Preferred Mentoring Style</label>
+            <select id="mentoring_style" name="mentoring_style">
+                <?php foreach (MENTORING_STYLES as $key => $label): ?>
+                    <option value="<?php echo $key; ?>" <?php echo ($mentor_data['mentoring_style'] ?? 'all') === $key ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($label); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="info-text">What type of mentoring do you prefer to provide?</p>
         </div>
         
         <div style="margin-top: 30px;">

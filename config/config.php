@@ -16,6 +16,12 @@ define('SESSION_LIFETIME', 3600); // 1 hour in seconds
 define('PASSWORD_MIN_LENGTH', 8);
 define('SESSION_NAME', 'cuhk_ementoring_session');
 
+// CSRF Protection
+// IMPORTANT: Change these secret keys to random, unique values for your installation
+// Generate new keys using: bin2hex(random_bytes(32))
+define('CSRF_SECRET_KEY', 'a7f5c8d9e2b1a4c6f8e3d5a7b9c2e4f6a8b0c3d5e7f9a1b3c5d7e9f1a3b5c7d9e1');
+// Alternative method to generate key: openssl_rand -hex 32
+
 // Rate Limiting Settings
 define('RATE_LIMIT_LOGIN', 5);          // Max login attempts
 define('RATE_LIMIT_REGISTER', 3);       // Max registration attempts
@@ -27,6 +33,23 @@ date_default_timezone_set('Asia/Hong_Kong');
 // Mentorship settings
 define('MAX_MENTEES_PER_MENTOR', 3);
 define('REMATCH_LIMIT', 1);
+
+// OpenAI / AI Matching settings
+// Set OPENAI_API_KEY as an environment variable (never hardcode in source)
+define('OPENAI_API_KEY', getenv('OPENAI_API_KEY') ?: '');
+define('OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small');
+define('OPENAI_CHAT_MODEL', 'gpt-4o-mini');
+define('AI_MATCHING_ENABLED', true);       // Set false to fall back to keyword matching
+define('EMBEDDING_CACHE_TTL', 86400);      // Seconds before re-fetching embedding (1 day)
+
+// Mentoring styles
+define('MENTORING_STYLES', [
+    'career_advice'      => 'Career Advice',
+    'academic_guidance'  => 'Academic Guidance',
+    'networking'         => 'Networking',
+    'skill_building'     => 'Skill Building',
+    'all'                => 'All / No Preference',
+]);
 
 // Practice areas
 define('PRACTICE_AREAS', [

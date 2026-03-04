@@ -66,7 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'practice_area_preference' => $practice_area_preference,
             'language_preference' => trim($_POST['language_preference'] ?? ''),
             'location' => trim($_POST['location'] ?? ''),
-            'bio' => trim($_POST['bio'] ?? '')
+            'bio' => trim($_POST['bio'] ?? ''),
+            'mentoring_style' => $_POST['mentoring_style'] ?? 'all',
+            'expectations' => trim($_POST['expectations'] ?? ''),
         ];
         
         if (empty($data['programme_level'])) {
@@ -169,6 +171,23 @@ include __DIR__ . '/../../includes/header.php';
             <label for="goals">Career Goals:</label>
             <textarea id="goals" name="goals" maxlength="500"><?php echo htmlspecialchars($profile['goals'] ?? ''); ?></textarea>
             <p style="font-size: 0.9rem; color: #666;">Maximum 500 characters</p>
+        </div>
+        
+        <div class="form-group">
+            <label for="expectations">Expectations from Mentorship:</label>
+            <textarea id="expectations" name="expectations" maxlength="500"><?php echo htmlspecialchars($profile['expectations'] ?? ''); ?></textarea>
+            <p style="font-size: 0.9rem; color: #666;">What do you hope to gain from this mentorship? Maximum 500 characters.</p>
+        </div>
+        
+        <div class="form-group">
+            <label for="mentoring_style">Preferred Mentoring Style:</label>
+            <select id="mentoring_style" name="mentoring_style">
+                <?php foreach (MENTORING_STYLES as $key => $label): ?>
+                    <option value="<?php echo $key; ?>" <?php echo ($profile['mentoring_style'] ?? 'all') === $key ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($label); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
         </div>
         
         <div class="form-group">

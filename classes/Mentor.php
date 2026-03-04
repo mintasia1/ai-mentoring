@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Logger.php';
+require_once __DIR__ . '/OpenAIService.php';
 
 class Mentor {
     private $db;
@@ -32,7 +33,7 @@ class Mentor {
                  alumni_id = ?, graduation_year = ?, programme_level = ?, 
                  practice_area = ?, current_position = ?, company = ?, 
                  expertise = ?, interests = ?, language = ?, location = ?, 
-                 bio = ?, max_mentees = ? 
+                 bio = ?, max_mentees = ?, mentoring_style = ?
                  WHERE user_id = ?"
             );
             $result = $stmt->execute([
@@ -48,10 +49,13 @@ class Mentor {
                 $data['location'] ?? null,
                 $data['bio'] ?? null,
                 $data['max_mentees'] ?? MAX_MENTEES_PER_MENTOR,
+                $data['mentoring_style'] ?? 'all',
                 $userId
             ]);
             if ($result) {
                 Logger::info("Mentor profile updated", ['user_id' => $userId]);
+                // Invalidate embedding cache so next match re-embeds updated text
+                (new OpenAIService())->invalidateCache($userId, 'mentor');
             }
             return $result;
         } else {
@@ -60,8 +64,8 @@ class Mentor {
                 "INSERT INTO mentor_profiles 
                  (user_id, alumni_id, graduation_year, programme_level, practice_area, 
                   current_position, company, expertise, interests, language, location, 
-                  bio, max_mentees) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                  bio, max_mentees, mentoring_style) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
             $result = $stmt->execute([
                 $userId,
@@ -76,7 +80,8 @@ class Mentor {
                 $data['language'] ?? null,
                 $data['location'] ?? null,
                 $data['bio'] ?? null,
-                $data['max_mentees'] ?? MAX_MENTEES_PER_MENTOR
+                $data['max_mentees'] ?? MAX_MENTEES_PER_MENTOR,
+                $data['mentoring_style'] ?? 'all',
             ]);
             if ($result) {
                 Logger::info("Mentor profile created", ['user_id' => $userId]);
