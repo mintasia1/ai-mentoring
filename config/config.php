@@ -38,7 +38,7 @@ define('REMATCH_LIMIT', 1);
 // Set OPENAI_API_KEY as an environment variable (never hardcode in source)
 define('OPENAI_API_KEY', getenv('OPENAI_API_KEY') ?: '');
 define('OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small');
-define('OPENAI_CHAT_MODEL', 'gpt-4o-mini');
+define('OPENAI_CHAT_MODEL', 'gpt-4.1-nano');
 define('AI_MATCHING_ENABLED', true);       // Set false to fall back to keyword matching
 define('EMBEDDING_CACHE_TTL', 86400);      // Seconds before re-fetching embedding (1 day)
 
