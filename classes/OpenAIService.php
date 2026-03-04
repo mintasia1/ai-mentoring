@@ -124,7 +124,7 @@ class OpenAIService {
         );
 
         $payload = [
-            'model'      => defined('OPENAI_CHAT_MODEL') ? OPENAI_CHAT_MODEL : 'gpt-4o-mini',
+            'model'      => defined('OPENAI_CHAT_MODEL') ? OPENAI_CHAT_MODEL : 'gpt-4.1-nano',
             'max_tokens' => 150,
             'messages'   => [
                 ['role' => 'system', 'content' => $systemPrompt],
