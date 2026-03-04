@@ -46,9 +46,11 @@ class Matching {
     /**
      * Calculate (and persist) the matching score between a mentee and a mentor.
      *
+     * @param bool $useAI  When true, use OpenAI embeddings + GPT proximity.
+     *                     When false, use fast keyword/Jaccard scoring.
      * @return float  Total score 0-100.
      */
-    public function calculateMatchScore(int $menteeId, int $mentorId): float {
+    public function calculateMatchScore(int $menteeId, int $mentorId, bool $useAI = false): float {
         $mentee = $this->getMenteeProfile($menteeId);
         $mentor = $this->getMentorProfile($mentorId);
 
@@ -56,7 +58,16 @@ class Matching {
             return 0.0;
         }
 
-        $useAI = defined('AI_MATCHING_ENABLED') && AI_MATCHING_ENABLED && defined('OPENAI_API_KEY') && OPENAI_API_KEY !== '';
+        // Server-side master kill-switch overrides the caller's preference
+        if ($useAI && (!defined('OPENAI_API_KEY') || OPENAI_API_KEY === '')) {
+            $useAI = false;
+        }
+
+        // ── Cache hit? ────────────────────────────────────────────────────────
+        $cached = $this->getValidCachedScore($menteeId, $mentorId, $useAI, $mentee, $mentor);
+        if ($cached !== null) {
+            return $cached;
+        }
 
         // ── Practice Area ────────────────────────────────────────────────────
         $practiceAreaMatch  = false;
@@ -149,7 +160,7 @@ class Matching {
             $menteeId, $mentorId,
             $practiceAreaMatch, $programmeMatch, $interestScore,
             $locationMatch, $languageMatch, $mentoringStyleMatch,
-            $total
+            $total, $useAI
         );
 
         Logger::debug('Matching score calculated', [
@@ -215,7 +226,7 @@ class Matching {
             $mentors = $mentorClass->getAvailableMentors($mentee['practice_area_preference'] ?? null);
 
             foreach ($mentors as $mentor) {
-                $this->calculateMatchScore((int) $menteeId, (int) $mentor['user_id']);
+                $this->calculateMatchScore((int) $menteeId, (int) $mentor['user_id'], true);
                 $count++;
             }
         }
@@ -234,15 +245,17 @@ class Matching {
 
     /**
      * Get recommended mentors for a mentee, sorted by match score descending.
+     *
+     * @param bool $useAI  Pass the session-level AI toggle state.
      */
-    public function getRecommendedMentors(int $menteeId, int $limit = 10): array {
+    public function getRecommendedMentors(int $menteeId, int $limit = 10, bool $useAI = false): array {
         $mentee      = $this->getMenteeProfile($menteeId);
         $mentorClass = new Mentor();
         $mentors     = $mentorClass->getAvailableMentors($mentee['practice_area_preference'] ?? null);
 
         $scoredMentors = [];
         foreach ($mentors as $mentor) {
-            $score             = $this->calculateMatchScore($menteeId, (int) $mentor['user_id']);
+            $score             = $this->calculateMatchScore($menteeId, (int) $mentor['user_id'], $useAI);
             $mentor['match_score'] = $score;
             $scoredMentors[]   = $mentor;
         }
@@ -365,10 +378,8 @@ class Matching {
         int $menteeId, int $mentorId,
         bool $practiceAreaMatch, bool $programmeMatch, float $interestScore,
         bool $locationMatch, bool $languageMatch, bool $mentoringStyleMatch,
-        float $totalScore
+        float $totalScore, bool $useAI = false
     ): void {
-        $useAI = defined('AI_MATCHING_ENABLED') && AI_MATCHING_ENABLED;
-
         $stmt = $this->db->prepare(
             "SELECT id FROM matching_scores WHERE mentee_id = ? AND mentor_id = ?"
         );
@@ -401,5 +412,50 @@ class Matching {
                 $locationMatch, $languageMatch, $mentoringStyleMatch, $totalScore, $version,
             ]);
         }
+    }
+
+    /**
+     * Return a valid cached total_score, or null if the cache is stale/missing.
+     *
+     * Cache is valid when:
+     *   - A matching_scores row exists with the expected algorithm_version
+     *   - calculated_at is newer than both mentor_profiles.updated_at
+     *     AND mentee_profiles.updated_at (i.e. no profile changed since last score)
+     */
+    private function getValidCachedScore(
+        int $menteeId, int $mentorId, bool $useAI,
+        array $mentee, array $mentor
+    ): ?float {
+        $expectedVersion = $useAI ? 'v2-ai' : 'v2-keyword';
+
+        $stmt = $this->db->prepare(
+            "SELECT total_score, algorithm_version, calculated_at
+             FROM matching_scores WHERE mentee_id = ? AND mentor_id = ?"
+        );
+        $stmt->execute([$menteeId, $mentorId]);
+        $row = $stmt->fetch();
+
+        if (!$row) {
+            return null; // no cache
+        }
+
+        if ($row['algorithm_version'] !== $expectedVersion) {
+            return null; // mode changed (AI ↔ keyword)
+        }
+
+        $calcTime    = strtotime($row['calculated_at']);
+        $mentorUpdated = strtotime($mentor['updated_at'] ?? '1970-01-01');
+        $menteeUpdated = strtotime($mentee['updated_at'] ?? '1970-01-01');
+
+        if ($calcTime <= $mentorUpdated || $calcTime <= $menteeUpdated) {
+            return null; // mentor or mentee profile changed since last score
+        }
+
+        Logger::debug('Matching: cache hit', [
+            'mentee_id' => $menteeId, 'mentor_id' => $mentorId,
+            'version'   => $expectedVersion, 'score' => $row['total_score'],
+        ]);
+
+        return (float) $row['total_score'];
     }
 }

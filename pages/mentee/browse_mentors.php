@@ -21,6 +21,17 @@ $userId = Auth::getCurrentUserId();
 
 Logger::debug("Browse mentors page accessed", ['user_id' => $userId]);
 
+// ── AI toggle (session-level, default OFF) ────────────────────────────────────
+if (!isset($_SESSION)) session_start();
+if (isset($_POST['toggle_ai'])) {
+    $_SESSION['ai_matching_enabled'] = !($_SESSION['ai_matching_enabled'] ?? false);
+    // Redirect to GET so a page refresh doesn't re-toggle
+    $qs = http_build_query(array_diff_key($_GET, ['toggle_ai' => '']));
+    header('Location: /pages/mentee/browse_mentors.php' . ($qs ? '?' . $qs : ''));
+    exit();
+}
+$useAI = $_SESSION['ai_matching_enabled'] ?? false;
+
 $menteeClass = new Mentee();
 $profile = $menteeClass->getProfile($userId);
 
@@ -35,7 +46,7 @@ $pendingRequests = $mentorshipClass->getMenteeRequests($userId, 'pending');
 $pendingMentorIds = array_column($pendingRequests, 'mentor_id');
 
 $matchingClass = new Matching();
-$allRecommendedMentors = $matchingClass->getRecommendedMentors($userId, 100); // Get more for pagination
+$allRecommendedMentors = $matchingClass->getRecommendedMentors($userId, 100, $useAI);
 
 // Pagination
 $perPage = isset($_GET['per_page']) ? intval($_GET['per_page']) : 25;
@@ -54,16 +65,51 @@ include __DIR__ . '/../../includes/header.php';
 ?>
 
 <h2>Browse Mentors</h2>
+
+<!-- AI Matching Toggle -->
+<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
+    <form method="POST" style="margin:0;">
+        <?php foreach ($_GET as $k => $v): ?>
+            <input type="hidden" name="<?php echo htmlspecialchars($k); ?>" value="<?php echo htmlspecialchars($v); ?>">
+        <?php endforeach; ?>
+        <button type="submit" name="toggle_ai" value="1"
+            style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;border:2px solid <?php echo $useAI ? '#27ae60' : '#95a5a6'; ?>;background:<?php echo $useAI ? '#eafaf1' : '#f4f6f7'; ?>;color:<?php echo $useAI ? '#1e8449' : '#616a6b'; ?>;font-weight:600;cursor:pointer;font-size:0.95rem;transition:all 0.2s;">
+            <span style="display:inline-block;width:34px;height:20px;border-radius:10px;background:<?php echo $useAI ? '#27ae60' : '#bdc3c7'; ?>;position:relative;">
+                <span style="position:absolute;top:3px;<?php echo $useAI ? 'right:3px' : 'left:3px'; ?>;width:14px;height:14px;border-radius:50%;background:#fff;transition:all 0.2s;"></span>
+            </span>
+            <?php if ($useAI): ?>
+                🤖 AI Matching <strong>ON</strong>
+            <?php else: ?>
+                ⚡ Fast Matching (AI <strong>OFF</strong>)
+            <?php endif; ?>
+        </button>
+    </form>
+    <span style="font-size:0.85rem;color:#888;">
+        <?php if ($useAI): ?>
+            Using OpenAI embeddings &amp; GPT proximity. Scores are cached — only updated when profiles change.
+        <?php else: ?>
+            Using keyword similarity (fast, no AI). Toggle ON for deeper semantic matching.
+        <?php endif; ?>
+    </span>
+</div>
+
 <div class="alert alert-info">
-    <p>Mentors are sorted by AI-powered compatibility based on your profile.</p>
-    <p><strong>About Match Score:</strong> Each factor is scored 0–100% and weighted:</p>
+    <p>Mentors are sorted by compatibility based on your profile.</p>
+    <p><strong>Scoring weights (100 pts total):</strong></p>
     <ul style="margin: 10px 0 0 20px;">
-        <li><strong>Practice Area (35%):</strong> OpenAI semantic embedding — compares your preferred area against the mentor's practice area</li>
+        <?php if ($useAI): ?>
+        <li><strong>Practice Area (35%):</strong> OpenAI semantic embedding — compares your preferred area against the mentor's</li>
         <li><strong>Interests &amp; Goals (25%):</strong> OpenAI semantic embedding — your interests, goals &amp; expectations vs mentor's expertise, interests &amp; bio</li>
-        <li><strong>Programme Level (15%):</strong> OpenAI semantic embedding on descriptive labels — captures knowledge-level hierarchy (e.g. LLM is closer to PhD than JD)</li>
-        <li><strong>Location (10%):</strong> GPT-4o-mini HK district-aware proximity — same district scores higher than cross-harbour or New Territories</li>
+        <li><strong>Programme Level (15%):</strong> OpenAI embedding on descriptive labels — captures knowledge-level hierarchy (LLM is closer to PhD than JD)</li>
+        <li><strong>Location (10%):</strong> GPT-4.1-nano HK district-aware proximity — same district scores higher than cross-harbour or NT</li>
+        <?php else: ?>
+        <li><strong>Practice Area (35%):</strong> Keyword overlap similarity (fast, no AI)</li>
+        <li><strong>Interests &amp; Goals (25%):</strong> Keyword overlap — your interests &amp; goals vs mentor's expertise &amp; bio</li>
+        <li><strong>Programme Level (15%):</strong> Compatibility matrix (exact=100%, nearby levels partial credit)</li>
+        <li><strong>Location (10%):</strong> Keyword similarity on location strings</li>
+        <?php endif; ?>
         <li><strong>Language (10%):</strong> Exact match on language preference</li>
-        <li><strong>Mentoring Style (5%):</strong> Mentor offering "All styles" matches any mentee; otherwise exact match required</li>
+        <li><strong>Mentoring Style (5%):</strong> Mentor offering "All styles" matches any mentee; otherwise exact match</li>
     </ul>
     <p>🟢 Excellent Match ≥80% &nbsp; 🟡 Good Match 60–79% &nbsp; ⚪ Partial Match &lt;60%</p>
     <p style="margin-top:6px;font-size:0.9rem;color:#555;">💡 Click a mentor's name for full profile details including mentoring style and interests.</p>
